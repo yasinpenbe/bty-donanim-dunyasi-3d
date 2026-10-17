@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { createHardwareModel } from './models/modelFactory.js';
 
 export class HardwareSceneManager {
@@ -19,107 +20,122 @@ export class HardwareSceneManager {
 
     // 1. Sahne (Scene)
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x090d16);
+    this.scene.background = new THREE.Color(0x070b12);
 
-    // 2. Kamera
-    this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-    this.defaultCameraPos = new THREE.Vector3(0, 3.5, 7.5);
+    // 2. Kamera (Perspektif)
+    this.camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
+    this.defaultCameraPos = new THREE.Vector3(0, 3.2, 7.8);
     this.camera.position.copy(this.defaultCameraPos);
 
-    // 3. Renderer
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    // 3. Renderer (Yüksek Kaliteli PBR / ACES Filmic)
+    this.renderer = new THREE.WebGLRenderer({ 
+      antialias: true, 
+      alpha: true, 
+      powerPreference: 'high-performance' 
+    });
     this.renderer.setSize(width, height);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.1;
+    this.renderer.toneMappingExposure = 1.25;
     this.container.appendChild(this.renderer.domElement);
 
-    // 4. OrbitControls
+    // 4. Gerçekçi Stüdyo Çevre Işığı (RoomEnvironment / PMREM)
+    // Bu özellik metallere, bakıra, altına ve cama gerçekçi stüdyo yansıması kazandırır!
+    const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
+    pmremGenerator.compileEquirectangularShader();
+    const roomEnvironment = new RoomEnvironment();
+    this.scene.environment = pmremGenerator.fromScene(roomEnvironment, 0.04).texture;
+    roomEnvironment.dispose();
+
+    // 5. OrbitControls
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
-    this.controls.maxPolarAngle = Math.PI / 2 + 0.1; // Zemin altına geçişi sınırla
-    this.controls.minDistance = 2.5;
-    this.controls.maxDistance = 15;
+    this.controls.maxPolarAngle = Math.PI / 2 + 0.05;
+    this.controls.minDistance = 2.0;
+    this.controls.maxDistance = 14;
     this.controls.autoRotate = this.autoRotate;
-    this.controls.autoRotateSpeed = 1.2;
+    this.controls.autoRotateSpeed = 1.0;
 
-    // 5. Işıklandırma (Stüdyo Kalitesi)
+    // 6. Stüdyo Işıklandırması
     this.setupLighting();
 
-    // 6. Zemin ve Podyum
+    // 7. Lüks Stüdyo Podyumu
     this.setupPodium();
 
-    // 7. Resize dinleyicisi
+    // 8. Yeniden Boyutlandırma Gözlemcisi
     this.resizeObserver = new ResizeObserver(() => this.onResize());
     this.resizeObserver.observe(this.container);
 
-    // 8. Render döngüsü
+    // 9. Render Döngüsü
     this.animate = this.animate.bind(this);
     this.animationFrameId = requestAnimationFrame(this.animate);
   }
 
   setupLighting() {
-    // Yumuşak ortam ışığı
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    // Dengeli yumuşak ortam aydınlatması
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
     this.scene.add(ambientLight);
 
-    // Ana Işık (Key Light)
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.4);
-    keyLight.position.set(5, 8, 5);
+    // Ana Stüdyo Işığı (Softbox Key Light)
+    const keyLight = new THREE.DirectionalLight(0xfffbf0, 1.8);
+    keyLight.position.set(6, 9, 6);
     keyLight.castShadow = true;
-    keyLight.shadow.mapSize.width = 1024;
-    keyLight.shadow.mapSize.height = 1024;
+    keyLight.shadow.mapSize.width = 2048;
+    keyLight.shadow.mapSize.height = 2048;
+    keyLight.shadow.bias = -0.0001;
     keyLight.shadow.camera.near = 0.5;
     keyLight.shadow.camera.far = 25;
     this.scene.add(keyLight);
 
-    // Dolgu Işığı (Fill Light - Mavi Ton)
-    const fillLight = new THREE.DirectionalLight(0x38bdf8, 0.6);
-    fillLight.position.set(-6, 4, -4);
+    // Soğuk Dolgu Işığı (Fill Light)
+    const fillLight = new THREE.DirectionalLight(0x93c5fd, 0.9);
+    fillLight.position.set(-6, 5, -3);
     this.scene.add(fillLight);
 
-    // Kontur / Arka Işık (Rim Light - Mor/Neon Ton)
-    const rimLight = new THREE.DirectionalLight(0xa855f7, 0.8);
-    rimLight.position.set(0, 5, -6);
+    // Arka Kontur Işığı (Rim Light)
+    const rimLight = new THREE.DirectionalLight(0x38bdf8, 1.2);
+    rimLight.position.set(0, 6, -6);
     this.scene.add(rimLight);
 
-    // Podyum Altı Noktasal Işık
-    const pointLight = new THREE.PointLight(0x06b6d4, 1.2, 8);
-    pointLight.position.set(0, 0.2, 0);
-    this.scene.add(pointLight);
+    // Podyum Altı Hafif Vurgu Spotu
+    const underLight = new THREE.PointLight(0x0284c7, 0.8, 6);
+    underLight.position.set(0, 0.15, 0);
+    this.scene.add(underLight);
   }
 
   setupPodium() {
-    // Dairesel Podyum Tabanı
-    const podiumGeo = new THREE.CylinderGeometry(3.6, 3.8, 0.2, 64);
+    // Fırçalanmış Koyu Titanyum Stüdyo Podyumu
+    const podiumGeo = new THREE.CylinderGeometry(3.6, 3.8, 0.18, 64);
     const podiumMat = new THREE.MeshStandardMaterial({
       color: 0x0f172a,
-      roughness: 0.3,
-      metalness: 0.6
+      roughness: 0.35,
+      metalness: 0.8
     });
     const podium = new THREE.Mesh(podiumGeo, podiumMat);
-    podium.position.y = -0.1;
+    podium.position.y = -0.09;
     podium.receiveShadow = true;
     this.scene.add(podium);
 
-    // Neon Podyum Işık Halkası
-    const ringGeo = new THREE.TorusGeometry(3.62, 0.04, 16, 64);
+    // İnce CNC Elmas Kesim Yansıtıcı Üst Halka
+    const ringGeo = new THREE.TorusGeometry(3.61, 0.03, 16, 64);
     const ringMat = new THREE.MeshStandardMaterial({
       color: 0x38bdf8,
-      emissive: 0x38bdf8,
-      emissiveIntensity: 1.0
+      metalness: 0.95,
+      roughness: 0.1,
+      emissive: 0x0284c7,
+      emissiveIntensity: 0.6
     });
     const ring = new THREE.Mesh(ringGeo, ringMat);
     ring.rotation.x = Math.PI / 2;
-    ring.position.y = 0.01;
+    ring.position.y = 0.005;
     this.scene.add(ring);
 
-    // Zemin Kılavuz Izgarası
-    const grid = new THREE.GridHelper(18, 18, 0x38bdf8, 0x1e293b);
-    grid.position.y = -0.11;
+    // Zarif Zemin Izgarası
+    const grid = new THREE.GridHelper(16, 16, 0x1e293b, 0x0f172a);
+    grid.position.y = -0.1;
     this.scene.add(grid);
   }
 
@@ -135,15 +151,15 @@ export class HardwareSceneManager {
     const model = createHardwareModel(hardwareId);
     this.currentModel = model;
 
-    // Modeli podyumun üstüne ortala
+    // Modeli podyum üstüne yerleştir
     model.position.set(0, 0, 0);
-    model.scale.set(0.01, 0.01, 0.01); // Yumuşak beliriş animasyonu için
+    model.scale.set(0.01, 0.01, 0.01);
     this.scene.add(model);
 
-    // Büyüme (pop-in) animasyonu
+    // Akıcı beliriş animasyonu
     let scale = 0.01;
     const animateIn = () => {
-      scale += 0.08;
+      scale += 0.09;
       if (scale < 1.0) {
         model.scale.set(scale, scale, scale);
         requestAnimationFrame(animateIn);
@@ -153,7 +169,6 @@ export class HardwareSceneManager {
     };
     animateIn();
 
-    // Kamerayı ve kontrolleri sıfırla
     this.resetCamera();
   }
 
@@ -165,7 +180,7 @@ export class HardwareSceneManager {
 
   resetCamera() {
     this.camera.position.copy(this.defaultCameraPos);
-    this.controls.target.set(0, 0.8, 0);
+    this.controls.target.set(0, 0.7, 0);
     this.controls.update();
   }
 

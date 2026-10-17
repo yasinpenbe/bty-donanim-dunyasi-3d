@@ -11,14 +11,12 @@ export function renderMatchingGame(container, onScoreAwarded) {
   let streak = 0;
 
   function initRound() {
-    // 16 parçadan rastgele 6 tanesini seç
     const shuffled = [...HARDWARE_ITEMS].sort(() => 0.5 - Math.random());
     roundItems = shuffled.slice(0, 6);
     matchesFound = 0;
     selectedDefId = null;
     selectedHwId = null;
 
-    // Tanımları ve Parçaları ayrı ayrı karıştır
     const definitions = [...roundItems].sort(() => 0.5 - Math.random());
     const hardwareCards = [...roundItems].sort(() => 0.5 - Math.random());
 
@@ -28,7 +26,7 @@ export function renderMatchingGame(container, onScoreAwarded) {
         <div class="game-header-bar">
           <div class="game-title-group">
             <h2 class="game-title">🎮 Etkinlik 1: Donanım Eşleştirme Oyunu</h2>
-            <p class="game-subtitle">Tanımları oku ve doğru donanım parçasıyla eşleştir!</p>
+            <p class="game-subtitle">Tanımları oku ve doğru gerçekçi donanım parçasıyla eşleştir!</p>
           </div>
 
           <div class="game-stats">
@@ -73,14 +71,14 @@ export function renderMatchingGame(container, onScoreAwarded) {
             </div>
           </div>
 
-          <!-- Sağ Sütun: Donanım Parçaları -->
+          <!-- Sağ Sütun: Donanım Parçaları (Gerçek Fotoğraflarla) -->
           <div class="matching-column" id="col-hardware">
-            <h3 class="column-title">💻 Donanım Parçaları</h3>
+            <h3 class="column-title">💻 Gerçek Donanım Parçaları</h3>
             <div class="cards-stack">
               ${hardwareCards.map(item => `
                 <div class="match-card hw-card" data-id="${item.id}" tabindex="0">
-                  <div class="hw-icon-circle" style="border-color: ${item.color};">
-                    <span class="hw-emoji">${item.icon}</span>
+                  <div class="hw-photo-box">
+                    <img src="${item.realPhotoUrl}" alt="${item.name}" class="hw-card-real-img" loading="lazy" />
                   </div>
                   <div class="hw-info-block">
                     <h4 class="hw-name">${item.name}</h4>
@@ -130,7 +128,6 @@ export function renderMatchingGame(container, onScoreAwarded) {
       });
     }
 
-    // Tanım Kartı Tıklaması
     defCards.forEach(card => {
       card.addEventListener('click', () => {
         if (card.classList.contains('matched')) return;
@@ -144,7 +141,6 @@ export function renderMatchingGame(container, onScoreAwarded) {
       });
     });
 
-    // Donanım Kartı Tıklaması
     hwCards.forEach(card => {
       card.addEventListener('click', () => {
         if (card.classList.contains('matched')) return;
@@ -158,7 +154,6 @@ export function renderMatchingGame(container, onScoreAwarded) {
       });
     });
 
-    // Sürükle-Bırak (Drag & Drop) Desteği
     hwCards.forEach(hwCard => {
       hwCard.setAttribute('draggable', 'true');
       hwCard.addEventListener('dragstart', (e) => {
@@ -202,7 +197,6 @@ export function renderMatchingGame(container, onScoreAwarded) {
       if (!defCard || !hwCard) return;
 
       if (selectedDefId === selectedHwId) {
-        // Doğru Eşleştirme!
         soundFX.playCorrect();
         streak++;
         score += 50 + streak * 10;
@@ -218,7 +212,6 @@ export function renderMatchingGame(container, onScoreAwarded) {
         defCard.classList.add('matched');
         hwCard.classList.add('matched');
 
-        // Onay Rozeti ekle
         defCard.querySelector('.card-num-badge').textContent = '✓';
         defCard.querySelector('.card-num-badge').classList.add('badge-success');
 
@@ -229,7 +222,6 @@ export function renderMatchingGame(container, onScoreAwarded) {
         selectedDefId = null;
         selectedHwId = null;
 
-        // Tur Bitti mi?
         if (matchesFound >= roundItems.length) {
           setTimeout(() => {
             soundFX.playWin();
@@ -242,7 +234,6 @@ export function renderMatchingGame(container, onScoreAwarded) {
           }, 500);
         }
       } else {
-        // Yanlış Eşleştirme!
         soundFX.playWrong();
         streak = 0;
         streakEl.textContent = streak;

@@ -1,6 +1,6 @@
 /**
  * BTY.5.1.5. Bilgisayar Sistemlerini Çözümleyebilme
- * 5. Sınıf Seviyesine Uygun Donanım Birimleri Veri Seti
+ * 5. Sınıf Seviyesine Uygun Donanım Birimleri Veri Seti (Gerçekçi Fotoğraflar ve 3D Modeller)
  */
 
 export const HARDWARE_ITEMS = [
@@ -24,7 +24,8 @@ export const HARDWARE_ITEMS = [
     },
     color: '#10b981',
     accentColor: '#059669',
-    assemblySlot: 'motherboard_base'
+    assemblySlot: 'motherboard_base',
+    realPhotoUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1000&auto=format&fit=crop&q=85'
   },
   {
     id: 'cpu',
@@ -45,7 +46,8 @@ export const HARDWARE_ITEMS = [
     },
     color: '#3b82f6',
     accentColor: '#1d4ed8',
-    assemblySlot: 'cpu_socket'
+    assemblySlot: 'cpu_socket',
+    realPhotoUrl: 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=1000&auto=format&fit=crop&q=85'
   },
   {
     id: 'ram',
@@ -66,7 +68,8 @@ export const HARDWARE_ITEMS = [
     },
     color: '#8b5cf6',
     accentColor: '#6d28d9',
-    assemblySlot: 'ram_slot'
+    assemblySlot: 'ram_slot',
+    realPhotoUrl: 'https://images.unsplash.com/photo-1562976540-1502c2145186?w=1000&auto=format&fit=crop&q=85'
   },
   {
     id: 'ssd',
@@ -87,7 +90,8 @@ export const HARDWARE_ITEMS = [
     },
     color: '#06b6d4',
     accentColor: '#0891b2',
-    assemblySlot: 'ssd_slot'
+    assemblySlot: 'ssd_slot',
+    realPhotoUrl: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=1000&auto=format&fit=crop&q=85'
   },
   {
     id: 'gpu',
@@ -108,7 +112,8 @@ export const HARDWARE_ITEMS = [
     },
     color: '#f59e0b',
     accentColor: '#d97706',
-    assemblySlot: 'gpu_slot'
+    assemblySlot: 'gpu_slot',
+    realPhotoUrl: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=1000&auto=format&fit=crop&q=85'
   },
   {
     id: 'psu',
@@ -129,7 +134,8 @@ export const HARDWARE_ITEMS = [
     },
     color: '#ef4444',
     accentColor: '#dc2626',
-    assemblySlot: 'psu_socket'
+    assemblySlot: 'psu_socket',
+    realPhotoUrl: 'https://images.unsplash.com/photo-1587202372573-0fb62d37320b?w=1000&auto=format&fit=crop&q=85'
   },
   {
     id: 'cooler',
@@ -150,7 +156,8 @@ export const HARDWARE_ITEMS = [
     },
     color: '#0284c7',
     accentColor: '#0369a1',
-    assemblySlot: 'cooler_slot'
+    assemblySlot: 'cooler_slot',
+    realPhotoUrl: 'https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=1000&auto=format&fit=crop&q=85'
   },
 
   // --- DIŞ DONANIM: GİRİŞ BİRİMLERİ ---
@@ -172,7 +179,8 @@ export const HARDWARE_ITEMS = [
       tur: "Giriş Birimi (Bilgisayara bilgi aktarır)"
     },
     color: '#6366f1',
-    accentColor: '#4f46e5'
+    accentColor: '#4f46e5',
+    realPhotoUrl: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=1000&auto=format&fit=crop&q=85'
   },
   {
     id: 'mouse',
@@ -192,7 +200,8 @@ export const HARDWARE_ITEMS = [
       tur: "Giriş Birimi (Bilgisayara bilgi aktarır)"
     },
     color: '#ec4899',
-    accentColor: '#db2777'
+    accentColor: '#db2777',
+    realPhotoUrl: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=1000&auto=format&fit=crop&q=85'
   },
   {
     id: 'microphone',
@@ -212,7 +221,8 @@ export const HARDWARE_ITEMS = [
       tur: "Giriş Birimi (Bilgisayara bilgi aktarır)"
     },
     color: '#14b8a6',
-    accentColor: '#0d9488'
+    accentColor: '#0d9488',
+    realPhotoUrl: 'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=1000&auto=format&fit=crop&q=85'
   },
   {
     id: 'webcam',
@@ -232,7 +242,8 @@ export const HARDWARE_ITEMS = [
       tur: "Giriş Birimi (Bilgisayara bilgi aktarır)"
     },
     color: '#f97316',
-    accentColor: '#ea580c'
+    accentColor: '#ea580c',
+    realPhotoUrl: 'https://images.unsplash.com/photo-1588508065123-287b28e013da?w=1000&auto=format&fit=crop&q=85'
   },
   {
     id: 'barcode',
@@ -252,7 +263,8 @@ export const HARDWARE_ITEMS = [
       tur: "Giriş Birimi (Bilgisayara bilgi aktarır)"
     },
     color: '#a855f7',
-    accentColor: '#9333ea'
+    accentColor: '#9333ea',
+    realPhotoUrl: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1000&auto=format&fit=crop&q=85'
   },
 
   // --- DIŞ DONANIM: ÇIKIŞ BİRİMLERİ ---
@@ -274,7 +286,8 @@ export const HARDWARE_ITEMS = [
       tur: "Çıkış Birimi (Bilgiyi bize sunar)"
     },
     color: '#38bdf8',
-    accentColor: '#0284c7'
+    accentColor: '#0284c7',
+    realPhotoUrl: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=1000&auto=format&fit=crop&q=85'
   },
   {
     id: 'speaker',
@@ -294,7 +307,8 @@ export const HARDWARE_ITEMS = [
       tur: "Çıkış Birimi (Bilgiyi bize sunar)"
     },
     color: '#e11d48',
-    accentColor: '#be123c'
+    accentColor: '#be123c',
+    realPhotoUrl: 'https://images.unsplash.com/photo-1545454675-3531b543be5d?w=1000&auto=format&fit=crop&q=85'
   },
   {
     id: 'printer',
@@ -314,7 +328,8 @@ export const HARDWARE_ITEMS = [
       tur: "Çıkış Birimi (Bilgiyi bize sunar)"
     },
     color: '#84cc16',
-    accentColor: '#65a30d'
+    accentColor: '#65a30d',
+    realPhotoUrl: 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?w=1000&auto=format&fit=crop&q=85'
   },
   {
     id: 'projector',
@@ -334,7 +349,8 @@ export const HARDWARE_ITEMS = [
       tur: "Çıkış Birimi (Bilgiyi bize sunar)"
     },
     color: '#fbbf24',
-    accentColor: '#d97706'
+    accentColor: '#d97706',
+    realPhotoUrl: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=1000&auto=format&fit=crop&q=85'
   }
 ];
 
@@ -350,54 +366,60 @@ export const ASSEMBLY_PARTS = [
     id: 'cpu',
     name: 'İşlemci (CPU)',
     slotId: 'cpu_socket',
-    slotName: 'CPU Soketi',
+    slotName: 'LGA-1700 Soket',
     icon: '🧠',
-    hint: "Anakartın tam ortasındaki kare altın pinli yuvaya takılır.",
-    successMsg: "Harika! İşlemci (CPU) bilgisayarın beyni olarak yerine oturdu!"
+    hint: "Anakartın tam ortasındaki metal nikel kaplamalı sokete takılır.",
+    successMsg: "Harika! İşlemci (CPU) bilgisayarın beyni olarak yerine oturdu!",
+    realPhotoUrl: 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=500&auto=format&fit=crop&q=80'
   },
   {
     id: 'ram',
-    name: 'RAM Bellek',
+    name: 'DDR5 RAM Bellek',
     slotId: 'ram_slot',
-    slotName: 'RAM Yuvası',
+    slotName: 'DDR5 Yuvası',
     icon: '🪑',
     hint: "İşlemcinin sağ yanındaki dikey uzun mandallı yuvaya takılır.",
-    successMsg: "Süper! RAM takıldı, çalışma masamız hazır!"
+    successMsg: "Süper! RAM takıldı, çalışma masamız hazır!",
+    realPhotoUrl: 'https://images.unsplash.com/photo-1562976540-1502c2145186?w=500&auto=format&fit=crop&q=80'
   },
   {
     id: 'gpu',
-    name: 'Ekran Kartı',
+    name: 'Ekran Kartı (GPU)',
     slotId: 'gpu_slot',
     slotName: 'PCIe x16 Slotu',
     icon: '🎨',
-    hint: "Anakartın alt kısmındaki uzun yatay PCIe yuvasına yerleşir.",
-    successMsg: "Muhteşem! Ekran kartı yerine oturdu, oyunlar akıcı çalışacak!"
+    hint: "Anakartın alt kısmındaki çelik zırhlı uzun PCIe yuvasına yerleşir.",
+    successMsg: "Muhteşem! Ekran kartı yerine oturdu, 4K oyunlar akıcı çalışacak!",
+    realPhotoUrl: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=500&auto=format&fit=crop&q=80'
   },
   {
     id: 'ssd',
-    name: 'M.2 SSD (Depolama)',
+    name: 'M.2 NVMe SSD',
     slotId: 'ssd_slot',
     slotName: 'M.2 SSD Yuvası',
     icon: '📚',
-    hint: "Anakartın ortasındaki küçük vidalı yuvaya takılır.",
-    successMsg: "Tebrikler! SSD takıldı, dosyalarımız güvende saklanacak!"
+    hint: "Anakartın ortasındaki alüminyum soğutucu zırhının altına yerleşir.",
+    successMsg: "Tebrikler! SSD takıldı, dosyalarımız kalıcı olarak güvende!",
+    realPhotoUrl: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=500&auto=format&fit=crop&q=80'
   },
   {
     id: 'cooler',
-    name: 'Soğutucu Fan',
+    name: 'Kule Tipi Soğutucu Fan',
     slotId: 'cooler_slot',
     slotName: 'İşlemci Soğutucu Alanı',
     icon: '❄️',
-    hint: "İşlemcinin tam üzerine monte edilerek onu serin tutar.",
-    successMsg: "Harika! Fan monte edildi, işlemcimiz artık hiç ısınmayacak!"
+    hint: "İşlemcinin tam üzerine monte edilerek bakır borularla onu serin tutar.",
+    successMsg: "Harika! Soğutucu monte edildi, işlemcimiz artık hiç ısınmayacak!",
+    realPhotoUrl: 'https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=500&auto=format&fit=crop&q=80'
   },
   {
     id: 'psu',
-    name: 'Güç Bağlantısı (PSU)',
+    name: '24-Pin ATX Güç Kablosu',
     slotId: 'psu_socket',
     slotName: '24-Pin ATX Güç Soketi',
     icon: '❤️',
-    hint: "Anakartın sağ kenarındaki 24 pinli ana güç yuvasına bağlanır.",
-    successMsg: "Tüm sisteme elektrik canı bağlandı, bilgisayar çalışmaya hazır!"
+    hint: "Anakartın sağ kenarındaki 24 pinli ana güç yuvasına kilitlenir.",
+    successMsg: "Tüm sisteme elektrik canı bağlandı, bilgisayar çalışmaya hazır!",
+    realPhotoUrl: 'https://images.unsplash.com/photo-1587202372573-0fb62d37320b?w=500&auto=format&fit=crop&q=80'
   }
 ];

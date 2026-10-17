@@ -13,7 +13,6 @@ export function renderAquariumGame(container, onScoreAwarded) {
   let isAnswerLocked = false;
 
   function initGame() {
-    // 10 soruluk bir soru havuzu oluştur
     const shuffled = [...HARDWARE_ITEMS].sort(() => 0.5 - Math.random());
     questions = shuffled.slice(0, 10);
     currentQIndex = 0;
@@ -42,7 +41,7 @@ export function renderAquariumGame(container, onScoreAwarded) {
           </div>
 
           <div class="q-definition-content">
-            <h3 class="q-prompt-title">Aşağıdaki tanıma uyan donanım baloncuğuna tıkla:</h3>
+            <h3 class="q-prompt-title">Aşağıdaki tanıma uyan gerçek donanım baloncuğuna tıkla:</h3>
             <p class="q-definition-text" id="q-text">Tanım yükleniyor...</p>
           </div>
         </div>
@@ -58,11 +57,7 @@ export function renderAquariumGame(container, onScoreAwarded) {
           <div class="seaweed seaweed-3">🌿</div>
           <div class="seaweed seaweed-4">🪸</div>
 
-          <!-- Yüzen Dekoratif Balıklar -->
-          <div class="ambient-fish fish-1">🐟</div>
-          <div class="ambient-fish fish-2">🐠</div>
-
-          <!-- Yüzen Donanım Baloncukları Konteyneri -->
+          <!-- Yüzen Baloncuklar Konteyneri -->
           <div class="bubbles-container" id="bubbles-container"></div>
 
           <!-- Anlık Geri Bildirim Toastı -->
@@ -115,10 +110,8 @@ export function renderAquariumGame(container, onScoreAwarded) {
     feedbackBanner.classList.add('hidden');
     bubblesContainer.innerHTML = '';
 
-    // TTS ile soruyu otomatik kısaca oku
     speechManager.speak(currentQ.shortDescription || currentQ.description);
 
-    // 1 Doğru + 3 Yanlış seçenek belirle
     const distractors = HARDWARE_ITEMS
       .filter(item => item.id !== currentQ.id)
       .sort(() => 0.5 - Math.random())
@@ -126,7 +119,6 @@ export function renderAquariumGame(container, onScoreAwarded) {
 
     const candidates = [currentQ, ...distractors].sort(() => 0.5 - Math.random());
 
-    // Baloncukları oluştur ve konumlandır
     const tank = container.querySelector('#aquarium-tank');
     const tankWidth = tank.clientWidth || 800;
     const tankHeight = tank.clientHeight || 450;
@@ -139,8 +131,8 @@ export function renderAquariumGame(container, onScoreAwarded) {
 
       bubbleEl.innerHTML = `
         <div class="bubble-inner">
-          <div class="bubble-icon-wrap" style="background: ${item.color}25; border-color: ${item.color};">
-            <span class="bubble-emoji">${item.icon}</span>
+          <div class="bubble-real-photo-wrap">
+            <img src="${item.realPhotoUrl}" alt="${item.shortName}" class="bubble-real-img" />
           </div>
           <span class="bubble-title">${item.shortName}</span>
           <span class="bubble-cat">${item.categoryLabel}</span>
@@ -148,10 +140,9 @@ export function renderAquariumGame(container, onScoreAwarded) {
         <div class="bubble-glare"></div>
       `;
 
-      // Sağ tarafta farklı x ve y başlangıç noktaları
-      const startX = tankWidth + (idx * 160) + (Math.random() * 80);
-      const startY = 40 + (idx * ((tankHeight - 160) / 4)) + (Math.random() * 20);
-      const speed = 1.1 + Math.random() * 0.5; // Sağdan sola yüzme hızı
+      const startX = tankWidth + (idx * 170) + (Math.random() * 80);
+      const startY = 40 + (idx * ((tankHeight - 170) / 4)) + (Math.random() * 20);
+      const speed = 1.1 + Math.random() * 0.5;
       const waveFreq = 0.02 + Math.random() * 0.02;
       const waveAmp = 15 + Math.random() * 10;
 
@@ -190,7 +181,6 @@ export function renderAquariumGame(container, onScoreAwarded) {
           b.step += b.waveFreq;
           b.y = b.baseY + Math.sin(b.step) * b.waveAmp;
 
-          // Sol kenardan tamamen çıktığında sağdan tekrar içeri al
           if (b.x < -180) {
             b.x = tankWidth + 40;
           }
@@ -214,7 +204,6 @@ export function renderAquariumGame(container, onScoreAwarded) {
     const streakEl = container.querySelector('#aq-streak');
 
     if (bubbleObj.isCorrect) {
-      // Doğru Yanıt!
       soundFX.playPop();
       soundFX.playCorrect();
 
@@ -239,14 +228,12 @@ export function renderAquariumGame(container, onScoreAwarded) {
       }, 1000);
 
     } else {
-      // Yanlış Yanıt!
       soundFX.playWrong();
       streak = 0;
       streakEl.textContent = streak;
 
       bubbleObj.element.classList.add('bubble-wrong');
 
-      // Doğru olan balonu bul ve yeşil renkle parlak şekilde vurgula
       const correctBubble = bubbles.find(b => b.isCorrect);
       if (correctBubble) {
         correctBubble.element.classList.add('bubble-correct-highlight');
@@ -258,7 +245,6 @@ export function renderAquariumGame(container, onScoreAwarded) {
       `;
       feedbackBanner.className = 'aquarium-feedback-banner fb-error';
 
-      // Öğrenci doğrusunu inceleyebilsin diye 2 saniye bekle
       setTimeout(() => {
         currentQIndex++;
         loadQuestion();

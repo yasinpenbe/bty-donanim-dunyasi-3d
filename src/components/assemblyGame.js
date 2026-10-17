@@ -32,7 +32,7 @@ export function renderAssemblyGame(container, onScoreAwarded) {
       <div class="assembly-guide-banner" id="assembly-guide-banner">
         <span class="guide-icon">💡</span>
         <span class="guide-text" id="assembly-guide-text">
-          Aşağıdaki parça tepsisinden takmak istediğin donanımı seç, ardından 3D anakart üzerindeki parlayan yuvaya tıkla!
+          Aşağıdaki parça tepsisinden takmak istediğin gerçek donanımı seç, ardından 3D anakart üzerindeki parlayan yuvaya tıkla!
         </span>
       </div>
 
@@ -47,13 +47,15 @@ export function renderAssemblyGame(container, onScoreAwarded) {
         </div>
       </div>
 
-      <!-- Alt Parça Tepsisi (Takılmayı Bekleyen Parçalar) -->
+      <!-- Alt Parça Tepsisi (Takılmayı Bekleyen Gerçek Parçalar) -->
       <div class="assembly-tray-wrapper">
-        <h3 class="tray-title">📦 Takılacak İç Donanım Parçaları:</h3>
+        <h3 class="tray-title">📦 Montaj Bekleyen Gerçek Donanım Parçaları:</h3>
         <div class="assembly-tray" id="assembly-tray">
           ${ASSEMBLY_PARTS.map(part => `
             <div class="assembly-tray-item" data-id="${part.id}" data-slot="${part.slotId}">
-              <div class="tray-item-icon">${part.icon}</div>
+              <div class="tray-photo-container">
+                <img src="${part.realPhotoUrl}" alt="${part.name}" class="tray-real-photo" />
+              </div>
               <div class="tray-item-info">
                 <span class="tray-item-name">${part.name}</span>
                 <span class="tray-slot-target">Hedef: ${part.slotName}</span>
@@ -85,7 +87,6 @@ export function renderAssemblyGame(container, onScoreAwarded) {
   const resetBtn = container.querySelector('#btn-reset-assembly');
   const playAgainBtn = container.querySelector('#btn-celebrate-again');
 
-  // 3D Sahneyi Başlat
   assemblyScene = new MotherboardAssemblyScene(viewportEl, {
     onSlotClicked: (slotId) => {
       handleSlotClicked(slotId);
@@ -95,7 +96,6 @@ export function renderAssemblyGame(container, onScoreAwarded) {
     }
   });
 
-  // Parça Tepsisi Tıklaması
   trayItems.forEach(itemEl => {
     itemEl.addEventListener('click', () => {
       if (itemEl.classList.contains('installed')) return;
@@ -116,7 +116,6 @@ export function renderAssemblyGame(container, onScoreAwarded) {
 
     if (partData) {
       guideText.innerHTML = `<strong>${partData.name}</strong> seçildi. ${partData.hint}`;
-      // İlgili yuvayı yeşilimsi vurgula
       assemblyScene.highlightSlot(partData.slotId, true);
     }
   }
@@ -135,7 +134,6 @@ export function renderAssemblyGame(container, onScoreAwarded) {
     const result = assemblyScene.tryInstallPart(selectedPartId, slotId);
 
     if (result.success) {
-      // Doğru yerleşim!
       soundFX.playSnap();
       installedCount++;
       if (onScoreAwarded) onScoreAwarded(50);
@@ -150,7 +148,6 @@ export function renderAssemblyGame(container, onScoreAwarded) {
 
       selectedPartId = null;
 
-      // Sıradaki takılmamış ilk parçayı otomatik ipucu olarak öner
       const nextUninstalled = ASSEMBLY_PARTS.find(p => {
         const el = container.querySelector(`.assembly-tray-item[data-id="${p.id}"]`);
         return el && !el.classList.contains('installed');
@@ -165,7 +162,6 @@ export function renderAssemblyGame(container, onScoreAwarded) {
       }
 
     } else {
-      // Yanlış yerleşim
       soundFX.playWrong();
       guideText.innerHTML = `❌ <strong>${result.message}</strong>`;
 

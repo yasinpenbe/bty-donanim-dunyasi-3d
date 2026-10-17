@@ -6,6 +6,7 @@ import { speechManager } from '../audio/speechManager.js';
 export function renderHardwareViewer(container, initialHardwareId = 'cpu') {
   let selectedCategory = 'all';
   let selectedHardwareId = initialHardwareId;
+  let viewMode = '3d'; // '3d' veya 'photo'
   let sceneManager = null;
   let isSpeaking = false;
 
@@ -29,12 +30,33 @@ export function renderHardwareViewer(container, initialHardwareId = 'cpu') {
 
       <!-- Orta Panel: 3D Görsel Sahne ve Alt Tanım Kartı -->
       <main class="viewer-content">
-        <!-- 3D Sahne Alanı -->
+        <!-- 3D & Gerçek Fotoğraf Görünüm Alanı -->
         <div class="three-container-wrapper">
+          <!-- 3D Sahne -->
           <div class="three-viewport" id="three-viewport"></div>
 
+          <!-- Gerçek Donanım Fotoğrafı Katmanı (Toggle ile açılır) -->
+          <div class="real-photo-viewport hidden" id="real-photo-viewport">
+            <div class="photo-card-wrap">
+              <img id="real-hardware-img" src="" alt="Gerçek Donanım Fotoğrafı" class="real-hardware-image" />
+              <div class="photo-badge-label">
+                <span>📸 Gerçek Donanım Fotoğrafı (Ultra HD)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Görünüm Modu Seçici (3D Model / Gerçek Fotoğraf) -->
+          <div class="view-mode-toggle-bar">
+            <button class="mode-toggle-btn active" id="btn-mode-3d">
+              <span>🌐 3D Gerçekçi Model</span>
+            </button>
+            <button class="mode-toggle-btn" id="btn-mode-photo">
+              <span>📸 Gerçek Fotoğrafı İncele</span>
+            </button>
+          </div>
+
           <!-- 3D Kontrol Araç Çubuğu (Overlay) -->
-          <div class="viewport-overlay-controls">
+          <div class="viewport-overlay-controls" id="viewport-3d-controls">
             <button class="view-ctrl-btn" id="btn-toggle-rotate" title="Otomatik Dönüşü Aç/Kapat">
               <span class="ctrl-icon">🔄</span>
               <span class="ctrl-text">Dönüş</span>
@@ -45,15 +67,15 @@ export function renderHardwareViewer(container, initialHardwareId = 'cpu') {
             <button class="view-ctrl-btn" id="btn-zoom-out" title="Uzaklaştır">
               <span class="ctrl-icon">➖</span>
             </button>
-            <button class="view-ctrl-btn" id="btn-reset-cam" title="Kamera Açısını Sıfırla">
+            <button class="view-ctrl-btn" id="btn-reset-cam" title="Açıyı Sıfırla">
               <span class="ctrl-icon">🎯</span>
               <span class="ctrl-text">Sıfırla</span>
             </button>
           </div>
 
           <!-- Kılavuz İpucu -->
-          <div class="viewport-hint">
-            <span>🖱️ Çevirmek için sürükleyin • Yakınlaştırmak için tekerleği kaydırın</span>
+          <div class="viewport-hint" id="viewport-hint">
+            <span>🖱️ 360° İncelemek için fareyle çevirin • Yakınlaştırmak için tekerleği kaydırın</span>
           </div>
         </div>
 
@@ -66,12 +88,48 @@ export function renderHardwareViewer(container, initialHardwareId = 'cpu') {
   `;
 
   const threeViewport = container.querySelector('#three-viewport');
+  const realPhotoViewport = container.querySelector('#real-photo-viewport');
+  const realHardwareImg = container.querySelector('#real-hardware-img');
   const listContainer = container.querySelector('#hardware-list');
   const detailCard = container.querySelector('#hardware-detail-card');
   const catButtons = container.querySelectorAll('.cat-pill');
+  const btnMode3d = container.querySelector('#btn-mode-3d');
+  const btnModePhoto = container.querySelector('#btn-mode-photo');
+  const controls3d = container.querySelector('#viewport-3d-controls');
+  const hint3d = container.querySelector('#viewport-hint');
 
   // Three.js Sahnesini Başlat
   sceneManager = new HardwareSceneManager(threeViewport);
+
+  // Görünüm Modu Değiştirme (3D / Gerçek Fotoğraf)
+  function setViewMode(mode) {
+    viewMode = mode;
+    soundFX.playClick();
+
+    if (mode === '3d') {
+      btnMode3d.classList.add('active');
+      btnModePhoto.classList.remove('active');
+      threeViewport.classList.remove('hidden');
+      realPhotoViewport.classList.add('hidden');
+      controls3d.classList.remove('hidden');
+      hint3d.classList.remove('hidden');
+    } else {
+      btnModePhoto.classList.add('active');
+      btnMode3d.classList.remove('active');
+      threeViewport.classList.add('hidden');
+      realPhotoViewport.classList.remove('hidden');
+      controls3d.classList.add('hidden');
+      hint3d.classList.add('hidden');
+
+      const item = HARDWARE_ITEMS.find(h => h.id === selectedHardwareId);
+      if (item && item.realPhotoUrl) {
+        realHardwareImg.src = item.realPhotoUrl;
+      }
+    }
+  }
+
+  btnMode3d.addEventListener('click', () => setViewMode('3d'));
+  btnModePhoto.addEventListener('click', () => setViewMode('photo'));
 
   // Donanım Listesini Filtreye Göre Doldur
   function updateList() {
@@ -86,8 +144,8 @@ export function renderHardwareViewer(container, initialHardwareId = 'cpu') {
 
     listContainer.innerHTML = filteredItems.map(item => `
       <div class="hardware-list-item ${item.id === selectedHardwareId ? 'active' : ''}" data-id="${item.id}">
-        <div class="item-icon-box" style="background-color: ${item.color}20; color: ${item.color};">
-          <span class="item-emoji">${item.icon}</span>
+        <div class="item-thumb-box">
+          <img src="${item.realPhotoUrl}" alt="${item.shortName}" class="item-thumb-img" loading="lazy" />
         </div>
         <div class="item-info">
           <h4 class="item-title">${item.shortName}</h4>
@@ -118,17 +176,24 @@ export function renderHardwareViewer(container, initialHardwareId = 'cpu') {
       el.classList.toggle('active', el.dataset.id === id);
     });
 
+    const item = HARDWARE_ITEMS.find(h => h.id === id);
+    if (!item) return;
+
+    // Fotoğrafı Güncelle
+    if (item.realPhotoUrl) {
+      realHardwareImg.src = item.realPhotoUrl;
+    }
+
     // 3D Modeli Yükle
     sceneManager.loadModel(id);
 
     // Detay Kartını Güncelle
-    const item = HARDWARE_ITEMS.find(h => h.id === id);
-    if (!item) return;
-
     detailCard.innerHTML = `
       <div class="detail-header">
         <div class="detail-title-group">
-          <span class="detail-icon">${item.icon}</span>
+          <div class="detail-photo-mini" title="Gerçek Fotoğraf">
+            <img src="${item.realPhotoUrl}" alt="${item.name}" />
+          </div>
           <div>
             <h2 class="detail-title">${item.name}</h2>
             <div class="detail-badges">
@@ -226,7 +291,6 @@ export function renderHardwareViewer(container, initialHardwareId = 'cpu') {
       selectedCategory = btn.dataset.cat;
       updateList();
 
-      // Filtre değişiminde o kategorideki ilk öğeyi otomatik seç
       const firstItem = HARDWARE_ITEMS.find(item => {
         if (selectedCategory === 'all') return true;
         if (selectedCategory === 'internal') return item.category === 'internal';

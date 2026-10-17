@@ -2,53 +2,59 @@ import * as THREE from 'three';
 import { createScreenTexture } from './textureHelpers.js';
 
 /**
- * 13. Ekran (Monitör) 3D Modeli
+ * 13. Ekran (27" Çerçevesiz IPS Monitör) Gerçekçi 3D Modeli
  */
 export function createMonitorModel() {
   const group = new THREE.Group();
 
-  // Monitör Kasası / İnce Çerçeve
-  const frameGeo = new THREE.BoxGeometry(6.4, 3.8, 0.25);
-  const frameMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.4, metalness: 0.6 });
+  // 3 Tarafı Mikro Kenarlı Ultra İnce Çerçeve (Micro-Edge Bezel)
+  const frameGeo = new THREE.BoxGeometry(6.6, 4.0, 0.18);
+  const frameMat = new THREE.MeshStandardMaterial({
+    color: 0x09090b,
+    roughness: 0.35,
+    metalness: 0.6
+  });
   const frame = new THREE.Mesh(frameGeo, frameMat);
-  frame.position.y = 2.4;
+  frame.position.y = 2.5;
   group.add(frame);
 
-  // Parlak Ekran Paneli (Masaüstü Görüntüsü ile)
-  const screenGeo = new THREE.PlaneGeometry(6.1, 3.5);
+  // Parlama Önleyici (Anti-Glare) Mat IPS Ekran Paneli
+  const screenGeo = new THREE.PlaneGeometry(6.4, 3.8);
   const screenMat = new THREE.MeshBasicMaterial({
     map: createScreenTexture()
   });
   const screen = new THREE.Mesh(screenGeo, screenMat);
-  screen.position.set(0, 2.4, 0.13);
+  screen.position.set(0, 2.5, 0.095);
   group.add(screen);
 
-  // Monitör Boynu (Stand Column)
-  const neckGeo = new THREE.CylinderGeometry(0.18, 0.22, 1.6, 16);
-  const neckMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8, roughness: 0.2 });
+  // Fırçalanmış Koyu Titanyum Monitör Ayağı ve Boynu
+  const neckGeo = new THREE.BoxGeometry(0.35, 1.8, 0.25);
+  const neckMat = new THREE.MeshStandardMaterial({
+    color: 0x64748b,
+    metalness: 0.92,
+    roughness: 0.2
+  });
   const neck = new THREE.Mesh(neckGeo, neckMat);
-  neck.position.set(0, 0.8, -0.2);
+  neck.position.set(0, 0.9, -0.2);
   group.add(neck);
 
-  // Monitör Tabanı (V-Tipi veya Dairesel Şık Taban)
-  const baseGeo = new THREE.BoxGeometry(2.6, 0.1, 1.8);
-  const baseMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.7, roughness: 0.3 });
-  const base = new THREE.Mesh(baseGeo, baseMat);
-  base.position.set(0, 0.05, 0);
+  // V-Tipi / Düz İnce Metal Taban
+  const baseGeo = new THREE.BoxGeometry(2.8, 0.08, 1.8);
+  const base = new THREE.Mesh(baseGeo, neckMat);
+  base.position.set(0, 0.04, 0);
   group.add(base);
 
-  // Güç Gösterge LED'i
-  const ledGeo = new THREE.SphereGeometry(0.04, 8, 8);
-  const ledMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
-  const led = new THREE.Mesh(ledGeo, ledMat);
-  led.position.set(2.8, 0.6, 0.13);
-  group.add(led);
+  // Arka VESA Montaj Alanı
+  const vesaGeo = new THREE.BoxGeometry(1.2, 1.2, 0.08);
+  const vesa = new THREE.Mesh(vesaGeo, frameMat);
+  vesa.position.set(0, 2.5, -0.12);
+  group.add(vesa);
 
   return group;
 }
 
 /**
- * 14. Hoparlör / Kulaklık 3D Modeli (Masaüstü Stereo Hoparlör Seti)
+ * 14. Hoparlör (Stüdyo Referans Monitörü) Gerçekçi 3D Modeli
  */
 export function createSpeakerModel() {
   const group = new THREE.Group();
@@ -58,66 +64,63 @@ export function createSpeakerModel() {
 
   speakers.forEach(x => {
     const speakerGroup = new THREE.Group();
-    speakerGroup.position.set(x, 1.6, 0);
+    speakerGroup.position.set(x, 1.7, 0);
 
-    // Ahşap / Mat Siyah Hoparlör Kabini
-    const cabGeo = new THREE.BoxGeometry(1.8, 3.2, 1.8);
-    const cabMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.5 });
+    // Ağır Akustik Yoğun Ahşap MDF Kabin (Mat Siyah Vinil Kaplama)
+    const cabGeo = new THREE.BoxGeometry(1.9, 3.4, 2.0);
+    const cabMat = new THREE.MeshStandardMaterial({
+      color: 0x18181b,
+      roughness: 0.5,
+      metalness: 0.1
+    });
     const cabinet = new THREE.Mesh(cabGeo, cabMat);
     speakerGroup.add(cabinet);
 
-    // Büyük Bas Sürücüsü (Woofer Koni)
-    const wooferRimGeo = new THREE.TorusGeometry(0.55, 0.06, 16, 32);
-    const wooferRimMat = new THREE.MeshStandardMaterial({ color: 0xe11d48, metalness: 0.8 });
+    // 5-İnç Sarı Dokuma Kevlar Woofer Koni (KRK Stili)
+    const wooferRimGeo = new THREE.TorusGeometry(0.58, 0.06, 16, 32);
+    const wooferRimMat = new THREE.MeshStandardMaterial({ color: 0x09090b, metalness: 0.8 });
     const wooferRim = new THREE.Mesh(wooferRimGeo, wooferRimMat);
-    wooferRim.position.set(0, -0.4, 0.91);
+    wooferRim.position.set(0, -0.4, 1.01);
     speakerGroup.add(wooferRim);
 
-    const wooferConeGeo = new THREE.CylinderGeometry(0.5, 0.1, 0.25, 24);
-    const wooferConeMat = new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.3 });
+    const wooferConeGeo = new THREE.CylinderGeometry(0.52, 0.12, 0.22, 32);
+    const wooferConeMat = new THREE.MeshStandardMaterial({
+      color: 0xeab308, // Sarı Kevlar
+      roughness: 0.4,
+      metalness: 0.15
+    });
     const wooferCone = new THREE.Mesh(wooferConeGeo, wooferConeMat);
     wooferCone.rotation.x = Math.PI / 2;
-    wooferCone.position.set(0, -0.4, 0.85);
+    wooferCone.position.set(0, -0.4, 0.96);
     speakerGroup.add(wooferCone);
     cones.push(wooferCone);
 
-    // Küçük Tiz Sürücüsü (Tweeter)
-    const tweetGeo = new THREE.SphereGeometry(0.22, 16, 16);
-    const tweetMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.2 });
+    // 1-İnç İpek Kubbe Tiz Sürücüsü (Silk Dome Tweeter)
+    const tweetGeo = new THREE.SphereGeometry(0.24, 24, 16);
+    const tweetMat = new THREE.MeshStandardMaterial({
+      color: 0x09090b,
+      roughness: 0.15,
+      metalness: 0.8
+    });
     const tweet = new THREE.Mesh(tweetGeo, tweetMat);
-    tweet.position.set(0, 0.7, 0.85);
+    tweet.position.set(0, 0.75, 0.96);
     speakerGroup.add(tweet);
 
-    // Sağ hoparlörde Ses Ayar Düğmesi
-    if (x > 0) {
-      const volGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.15, 16);
-      const volMat = new THREE.MeshStandardMaterial({ color: 0xe11d48, metalness: 0.7 });
-      const vol = new THREE.Mesh(volGeo, volMat);
-      vol.rotation.x = Math.PI / 2;
-      vol.position.set(0, -1.2, 0.92);
-      speakerGroup.add(vol);
-    }
+    // Ön Bas Refleks Akustik Hava Portu (Bass Port)
+    const portGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.4, 24);
+    const portMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const port = new THREE.Mesh(portGeo, portMat);
+    port.rotation.x = Math.PI / 2;
+    port.position.set(0, -1.2, 0.95);
+    speakerGroup.add(port);
 
     group.add(speakerGroup);
   });
 
-  // İki hoparlör arasındaki bağlantı kablosu
-  const cableCurve = new THREE.CubicBezierCurve3(
-    new THREE.Vector3(-1.8, 0.2, -0.9),
-    new THREE.Vector3(-0.9, 0.05, -1.2),
-    new THREE.Vector3(0.9, 0.05, -1.2),
-    new THREE.Vector3(1.8, 0.2, -0.9)
-  );
-  const cableGeo = new THREE.TubeGeometry(cableCurve, 20, 0.03, 8, false);
-  const cableMat = new THREE.MeshStandardMaterial({ color: 0x09090b });
-  const cable = new THREE.Mesh(cableGeo, cableMat);
-  group.add(cable);
-
   group.update = (time) => {
-    // Ses çalarken woofer konilerinin ritmik titreşimi
-    const beat = Math.sin(time * 8) * 0.05;
+    const pulse = Math.sin(time * 9) * 0.04;
     cones.forEach(c => {
-      c.position.z = 0.85 + beat;
+      c.position.z = 0.96 + pulse;
     });
   };
 
@@ -125,167 +128,146 @@ export function createSpeakerModel() {
 }
 
 /**
- * 15. Yazıcı (Printer) 3D Modeli
+ * 15. Yazıcı (Çok Fonksiyonlu Renkli Lazer/Mürekkep) Gerçekçi 3D Modeli
  */
 export function createPrinterModel() {
   const group = new THREE.Group();
 
-  // Yazıcı Ana Gövdesi
-  const bodyGeo = new THREE.BoxGeometry(4.4, 1.8, 3.2);
-  const bodyMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 });
+  // Mat Beyaz ve Antrasit Çift Tonlu Kompakt Gövde
+  const bodyGeo = new THREE.BoxGeometry(4.6, 2.0, 3.4);
+  const bodyMat = new THREE.MeshStandardMaterial({
+    color: 0xf8fafc,
+    roughness: 0.35,
+    metalness: 0.15
+  });
   const body = new THREE.Mesh(bodyGeo, bodyMat);
   body.position.y = 1.0;
   group.add(body);
 
-  // Üst Kapak ve Tarayıcı Camı Alanı
-  const lidGeo = new THREE.BoxGeometry(4.4, 0.2, 3.2);
-  const lidMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.4 });
+  // Üst Düz Yataklı Tarayıcı Kapağı
+  const lidGeo = new THREE.BoxGeometry(4.6, 0.18, 3.4);
+  const lidMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4, metalness: 0.3 });
   const lid = new THREE.Mesh(lidGeo, lidMat);
-  lid.position.y = 1.95;
+  lid.position.y = 2.05;
   group.add(lid);
 
-  // Arka Kâğıt Besleme Tepsisi
-  const paperTrayGeo = new THREE.BoxGeometry(3.0, 0.1, 1.6);
-  const paperTrayMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8 });
-  const paperTray = new THREE.Mesh(paperTrayGeo, paperTrayMat);
-  paperTray.rotation.x = -0.6;
-  paperTray.position.set(0, 2.2, -1.6);
+  // Arka Kâğıt Besleme Tepsisi ve Beyaz Kâğıtlar
+  const trayMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.5 });
+  const paperTray = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.08, 1.6), trayMat);
+  paperTray.rotation.x = -0.55;
+  paperTray.position.set(0, 2.3, -1.7);
   group.add(paperTray);
 
-  // Tepsideki Beyaz Kâğıtlar
-  const sheetsGeo = new THREE.BoxGeometry(2.4, 0.15, 1.4);
-  const sheetsMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
-  const sheets = new THREE.Mesh(sheetsGeo, sheetsMat);
-  sheets.rotation.x = -0.6;
-  sheets.position.set(0, 2.3, -1.5);
+  const sheetsMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.85 });
+  const sheets = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.12, 1.4), sheetsMat);
+  sheets.rotation.x = -0.55;
+  sheets.position.set(0, 2.38, -1.6);
   group.add(sheets);
 
-  // Ön Kâğıt Çıkış Yuvası
-  const exitSlotGeo = new THREE.BoxGeometry(2.8, 0.25, 0.6);
-  const exitSlotMat = new THREE.MeshBasicMaterial({ color: 0x0f172a });
-  const exitSlot = new THREE.Mesh(exitSlotGeo, exitSlotMat);
-  exitSlot.position.set(0, 0.6, 1.4);
+  // Ön Kâğıt Çıkış Ağzı ve Basılmış Belge
+  const exitSlot = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.22, 0.5), new THREE.MeshBasicMaterial({ color: 0x09090b }));
+  exitSlot.position.set(0, 0.7, 1.5);
   group.add(exitSlot);
 
-  // Çıkan Renkli Baskılı Kâğıt
-  const printedPaperGeo = new THREE.PlaneGeometry(2.2, 1.6);
-  // Basılı kâğıt dokusu
+  // Çıkan Renkli Grafik Test Sayfası
+  const paperGeo = new THREE.PlaneGeometry(2.4, 1.8);
   const canvas = document.createElement('canvas');
-  canvas.width = 256;
-  canvas.height = 256;
+  canvas.width = 512;
+  canvas.height = 512;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, 256, 256);
-  ctx.fillStyle = '#3b82f6';
-  ctx.fillRect(20, 20, 216, 40);
+  ctx.fillRect(0, 0, 512, 512);
+
+  // Sayfa Üst Başlığı
+  ctx.fillStyle = '#0284c7';
+  ctx.fillRect(30, 30, 452, 60);
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 20px sans-serif';
-  ctx.fillText('BTY 5. SINIF', 30, 48);
+  ctx.font = 'bold 32px sans-serif';
+  ctx.fillText('BTY 5. SINIF DERS NOTU', 50, 72);
+
+  // Renkli Görsel ve Metin Çizgileri
   ctx.fillStyle = '#10b981';
-  ctx.fillRect(20, 80, 100, 60);
+  ctx.fillRect(30, 120, 200, 140);
   ctx.fillStyle = '#64748b';
-  for (let l = 0; l < 5; l++) {
-    ctx.fillRect(130, 85 + l * 12, 100, 5);
+  for (let l = 0; l < 8; l++) {
+    ctx.fillRect(250, 130 + l * 20, 230, 8);
   }
   const paperTexture = new THREE.CanvasTexture(canvas);
 
-  const printedPaperMat = new THREE.MeshBasicMaterial({
-    map: paperTexture,
-    side: THREE.DoubleSide
-  });
-  const printedPaper = new THREE.Mesh(printedPaperGeo, printedPaperMat);
-  printedPaper.rotation.x = -Math.PI / 2 + 0.15;
-  printedPaper.position.set(0, 0.65, 2.0);
+  const printedPaper = new THREE.Mesh(paperGeo, new THREE.MeshBasicMaterial({ map: paperTexture, side: THREE.DoubleSide }));
+  printedPaper.rotation.x = -Math.PI / 2 + 0.12;
+  printedPaper.position.set(0, 0.75, 2.15);
   group.add(printedPaper);
-
-  // Kontrol Paneli ve Güç Düğmesi
-  const panelGeo = new THREE.BoxGeometry(0.8, 0.4, 0.05);
-  const panelMat = new THREE.MeshStandardMaterial({ color: 0x1e293b });
-  const panel = new THREE.Mesh(panelGeo, panelMat);
-  panel.position.set(1.5, 1.4, 1.62);
-  group.add(panel);
-
-  const btnGeo = new THREE.SphereGeometry(0.08, 12, 12);
-  const btnMat = new THREE.MeshBasicMaterial({ color: 0x84cc16 });
-  const btn = new THREE.Mesh(btnGeo, btnMat);
-  btn.position.set(1.7, 1.4, 1.65);
-  group.add(btn);
 
   return group;
 }
 
 /**
- * 16. Projeksiyon Cihazı 3D Modeli
+ * 16. Projeksiyon Cihazı (Full HD Optik Lensli) Gerçekçi 3D Modeli
  */
 export function createProjectorModel() {
   const group = new THREE.Group();
 
-  // Projeksiyon Gövdesi (Kompakt Şık Kutu)
-  const bodyGeo = new THREE.BoxGeometry(4.2, 1.4, 3.4);
-  const bodyMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.35, metalness: 0.5 });
+  // Eloksallı Antrasit Şık Gövde
+  const bodyGeo = new THREE.BoxGeometry(4.4, 1.5, 3.6);
+  const bodyMat = new THREE.MeshStandardMaterial({
+    color: 0x18181b,
+    metalness: 0.8,
+    roughness: 0.25
+  });
   const body = new THREE.Mesh(bodyGeo, bodyMat);
   body.position.y = 1.0;
   group.add(body);
 
-  // Ön Büyük Projeksiyon Merceği
-  const lensRingGeo = new THREE.CylinderGeometry(0.65, 0.65, 0.3, 24);
-  const lensRingMat = new THREE.MeshStandardMaterial({ color: 0xfbbf24, metalness: 0.9 });
+  // Tırtıklı Odak Halkalı Büyük Optik Cam Projeksiyon Lensi
+  const lensRingGeo = new THREE.CylinderGeometry(0.72, 0.72, 0.35, 32);
+  const lensRingMat = new THREE.MeshStandardMaterial({
+    color: 0xd4d4d8,
+    metalness: 0.95,
+    roughness: 0.15
+  });
   const lensRing = new THREE.Mesh(lensRingGeo, lensRingMat);
   lensRing.rotation.x = Math.PI / 2;
-  lensRing.position.set(-1.0, 1.0, 1.75);
+  lensRing.position.set(-1.1, 1.0, 1.85);
   group.add(lensRing);
 
-  const lensGlassGeo = new THREE.SphereGeometry(0.5, 24, 16);
-  const lensGlassMat = new THREE.MeshStandardMaterial({
-    color: 0x67e8f9,
-    roughness: 0.1,
-    metalness: 0.9,
-    emissive: 0x06b6d4,
-    emissiveIntensity: 0.6
+  // Parlak Yansıtıcı Optik Cam
+  const lensGlassGeo = new THREE.SphereGeometry(0.56, 32, 24);
+  const lensGlassMat = new THREE.MeshPhysicalMaterial({
+    color: 0x38bdf8,
+    transmission: 0.8,
+    ior: 1.6,
+    roughness: 0.05,
+    metalness: 0.1,
+    emissive: 0x0284c7,
+    emissiveIntensity: 0.8
   });
   const lensGlass = new THREE.Mesh(lensGlassGeo, lensGlassMat);
-  lensGlass.position.set(-1.0, 1.0, 1.85);
+  lensGlass.position.set(-1.1, 1.0, 1.95);
   group.add(lensGlass);
 
-  // Işık Huzmesi Konisi (Volumetrik Işık Efekti)
-  const beamGeo = new THREE.ConeGeometry(2.5, 5.0, 32, 1, true);
+  // Volumetrik Işık Huzmesi Konisi
+  const beamGeo = new THREE.ConeGeometry(2.6, 5.4, 32, 1, true);
   const beamMat = new THREE.MeshBasicMaterial({
-    color: 0x38bdf8,
+    color: 0x7dd3fc,
     transparent: true,
-    opacity: 0.25,
+    opacity: 0.28,
     side: THREE.DoubleSide
   });
   const beam = new THREE.Mesh(beamGeo, beamMat);
   beam.rotation.x = -Math.PI / 2;
-  beam.position.set(-1.0, 1.0, 4.4);
+  beam.position.set(-1.1, 1.0, 4.7);
   group.add(beam);
 
-  // Yan Havalandırma Izgaraları
-  const ventGeo = new THREE.BoxGeometry(0.05, 0.8, 2.2);
-  const ventMat = new THREE.MeshBasicMaterial({ color: 0x0f172a });
-  const ventRight = new THREE.Mesh(ventGeo, ventMat);
-  ventRight.position.set(2.11, 1.0, 0);
-  group.add(ventRight);
-
-  // Üst Tuş Takımı
-  const topBtnGeo = new THREE.BoxGeometry(0.2, 0.05, 0.2);
-  const topBtnMat = new THREE.MeshStandardMaterial({ color: 0x64748b });
-  for (let i = 0; i < 4; i++) {
-    const btn = new THREE.Mesh(topBtnGeo, topBtnMat);
-    btn.position.set(1.0 + (i % 2) * 0.35, 1.72, -0.4 + Math.floor(i / 2) * 0.35);
-    group.add(btn);
-  }
-
-  // Ayarlanabilir Ön Yükseklik Vidası
-  const footGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.35, 16);
-  const footMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8 });
-  const foot = new THREE.Mesh(footGeo, footMat);
-  foot.position.set(0, 0.15, 1.4);
-  group.add(foot);
+  // Yan Isı Tahliye Izgaraları
+  const ventGeo = new THREE.BoxGeometry(0.06, 0.9, 2.4);
+  const ventMat = new THREE.MeshBasicMaterial({ color: 0x09090b });
+  const vent = new THREE.Mesh(ventGeo, ventMat);
+  vent.position.set(2.21, 1.0, 0);
+  group.add(vent);
 
   group.update = (time) => {
-    // Işık huzmesi titreşim efekti
-    beamMat.opacity = 0.2 + Math.sin(time * 6) * 0.06;
+    beamMat.opacity = 0.22 + Math.sin(time * 6) * 0.06;
   };
 
   return group;

@@ -2,325 +2,420 @@ import * as THREE from 'three';
 import { 
   createPcbTexture, 
   createCpuTexture, 
+  createCpuPinTexture,
   createRamTexture, 
-  createSsdTexture 
+  createSsdTexture,
+  createGpuBackplateTexture
 } from './textureHelpers.js';
 
 /**
- * 1. Anakart (Motherboard) 3D Modeli
+ * 1. Anakart (Motherboard) Gerçekçi 3D Modeli
  */
 export function createMotherboardModel() {
   const group = new THREE.Group();
 
-  // Ana PCB Kartı
-  const pcbGeo = new THREE.BoxGeometry(6, 0.15, 6);
+  // 10-Katmanlı Mat Siyah Yüksek Kalite PCB
+  const pcbGeo = new THREE.BoxGeometry(6.4, 0.16, 6.4);
   const pcbMat = new THREE.MeshStandardMaterial({
-    color: 0x0a2818,
-    roughness: 0.4,
-    metalness: 0.2,
-    map: createPcbTexture('#0a2818')
+    color: 0x090d14,
+    roughness: 0.35,
+    metalness: 0.25,
+    map: createPcbTexture('#090d14')
   });
   const pcb = new THREE.Mesh(pcbGeo, pcbMat);
   pcb.castShadow = true;
   pcb.receiveShadow = true;
   group.add(pcb);
 
-  // CPU Soketi (Merkezde)
-  const socketGeo = new THREE.BoxGeometry(1.6, 0.12, 1.6);
-  const socketMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8, roughness: 0.3 });
-  const socket = new THREE.Mesh(socketGeo, socketMat);
-  socket.position.set(-0.5, 0.12, -0.5);
-  group.add(socket);
+  // LGA-1700 Nikel Kaplama Metal CPU Soketi
+  const socketBaseGeo = new THREE.BoxGeometry(1.8, 0.12, 1.8);
+  const socketMetalMat = new THREE.MeshStandardMaterial({
+    color: 0xd4d4d8,
+    metalness: 0.95,
+    roughness: 0.18
+  });
+  const socketBase = new THREE.Mesh(socketBaseGeo, socketMetalMat);
+  socketBase.position.set(-0.6, 0.12, -0.6);
+  group.add(socketBase);
 
-  // Altın CPU Pin Yatağı
-  const pinBedGeo = new THREE.PlaneGeometry(1.2, 1.2);
-  const pinBedMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9, roughness: 0.2 });
-  const pinBed = new THREE.Mesh(pinBedGeo, pinBedMat);
-  pinBed.rotation.x = -Math.PI / 2;
-  pinBed.position.set(-0.5, 0.19, -0.5);
-  group.add(pinBed);
+  // Soket Kilitleme Mandalı (Metal Kolu)
+  const leverGeo = new THREE.CylinderGeometry(0.04, 0.04, 2.0, 12);
+  const lever = new THREE.Mesh(leverGeo, socketMetalMat);
+  lever.rotation.z = Math.PI / 2;
+  lever.position.set(-0.6, 0.22, 0.4);
+  group.add(lever);
 
-  // RAM Yuvaları (4 Adet Dikey Slot)
-  const ramSlotGeo = new THREE.BoxGeometry(0.18, 0.25, 2.8);
-  const ramSlotMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 });
+  // DDR5 Bellek Yuvaları (4 Adet, Çelik Zırhlı)
+  const ddrSlotGeo = new THREE.BoxGeometry(0.2, 0.28, 3.0);
+  const ddrSlotMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.5 });
+  const ddrArmorMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.2 });
+
   for (let i = 0; i < 4; i++) {
-    const slot = new THREE.Mesh(ramSlotGeo, ramSlotMat);
-    slot.position.set(1.1 + i * 0.3, 0.15, -0.5);
+    const slot = new THREE.Mesh(ddrSlotGeo, ddrSlotMat);
+    slot.position.set(1.2 + i * 0.32, 0.18, -0.6);
     group.add(slot);
 
-    // Kilit Mandalları
-    const clipGeo = new THREE.BoxGeometry(0.2, 0.35, 0.15);
-    const clipMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
-    const clipTop = new THREE.Mesh(clipGeo, clipMat);
-    clipTop.position.set(1.1 + i * 0.3, 0.2, -1.9);
-    const clipBottom = new THREE.Mesh(clipGeo, clipMat);
-    clipBottom.position.set(1.1 + i * 0.3, 0.2, 0.9);
-    group.add(clipTop, clipBottom);
+    // Yan kilit mandalları
+    const clipGeo = new THREE.BoxGeometry(0.22, 0.38, 0.16);
+    const clip1 = new THREE.Mesh(clipGeo, ddrArmorMat);
+    clip1.position.set(1.2 + i * 0.32, 0.24, -2.1);
+    const clip2 = new THREE.Mesh(clipGeo, ddrArmorMat);
+    clip2.position.set(1.2 + i * 0.32, 0.24, 0.9);
+    group.add(clip1, clip2);
   }
 
-  // PCIe x16 Ekran Kartı Yuvaları (2 Adet Yatay Slot)
-  const pcieSlotGeo = new THREE.BoxGeometry(3.6, 0.25, 0.2);
-  const pcieSlotMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.5, roughness: 0.4 });
-  const pcie1 = new THREE.Mesh(pcieSlotGeo, pcieSlotMat);
-  pcie1.position.set(-0.5, 0.15, 1.4);
-  const pcie2 = new THREE.Mesh(pcieSlotGeo, pcieSlotMat);
-  pcie2.position.set(-0.5, 0.15, 2.3);
-  group.add(pcie1, pcie2);
+  // PCIe x16 Çelik Korumalı (Steel Armor) Ekran Kartı Yuvası
+  const pcieGeo = new THREE.BoxGeometry(4.0, 0.28, 0.22);
+  const pcieSteelMat = new THREE.MeshStandardMaterial({
+    color: 0xf1f5f9,
+    metalness: 0.95,
+    roughness: 0.15
+  });
+  const pcieSlot = new THREE.Mesh(pcieGeo, pcieSteelMat);
+  pcieSlot.position.set(-0.5, 0.18, 1.4);
+  group.add(pcieSlot);
 
-  // M.2 SSD Yuvaları
-  const m2SlotGeo = new THREE.BoxGeometry(0.3, 0.1, 0.5);
-  const m2SlotMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
-  const m2 = new THREE.Mesh(m2SlotGeo, m2SlotMat);
-  m2.position.set(-0.5, 0.12, 0.6);
-  group.add(m2);
+  // İkinci PCIe Yuvası
+  const pcie2 = new THREE.Mesh(pcieGeo, new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.4 }));
+  pcie2.position.set(-0.5, 0.18, 2.4);
+  group.add(pcie2);
 
-  // VRM & Yonga Seti Alüminyum Soğutucu Blokları
-  const vrmGeo = new THREE.BoxGeometry(0.6, 0.8, 1.8);
-  const vrmMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.2 });
-  const vrm1 = new THREE.Mesh(vrmGeo, vrmMat);
-  vrm1.position.set(-1.8, 0.45, -0.5);
-  const vrm2 = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.8, 0.6), vrmMat);
-  vrm2.position.set(-0.5, 0.45, -1.8);
-  group.add(vrm1, vrm2);
+  // M.2 Alüminyum Soğutucu Zırhı (Shield Frozr)
+  const m2ArmorGeo = new THREE.BoxGeometry(2.4, 0.2, 0.7);
+  const m2ArmorMat = new THREE.MeshStandardMaterial({
+    color: 0x1e293b,
+    metalness: 0.85,
+    roughness: 0.25
+  });
+  const m2Armor = new THREE.Mesh(m2ArmorGeo, m2ArmorMat);
+  m2Armor.position.set(-0.5, 0.18, 0.45);
+  group.add(m2Armor);
 
-  // Çipset Soğutucusu
-  const chipsetGeo = new THREE.BoxGeometry(1.2, 0.5, 1.2);
-  const chipsetMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.9, roughness: 0.2 });
-  const chipset = new THREE.Mesh(chipsetGeo, chipsetMat);
-  chipset.position.set(1.5, 0.3, 1.8);
-  group.add(chipset);
+  // VRM Ağır Alüminyum Isı Blokları (Heatsinks)
+  const vrmMat = new THREE.MeshStandardMaterial({
+    color: 0x18181b,
+    metalness: 0.9,
+    roughness: 0.2
+  });
+  const vrmTop = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.9, 0.8), vrmMat);
+  vrmTop.position.set(-0.6, 0.52, -2.1);
+  const vrmLeft = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.9, 2.4), vrmMat);
+  vrmLeft.position.set(-2.0, 0.52, -0.6);
+  group.add(vrmTop, vrmLeft);
 
-  // Arka Giriş-Çıkış (I/O) Port Kalkanı
-  const ioGeo = new THREE.BoxGeometry(0.6, 0.9, 3.2);
-  const ioMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9, roughness: 0.2 });
+  // Arka I/O Port Kalkanı (Entegre Giriş/Çıkış Paneli)
+  const ioGeo = new THREE.BoxGeometry(0.8, 1.2, 3.8);
+  const ioMat = new THREE.MeshStandardMaterial({
+    color: 0x334155,
+    metalness: 0.85,
+    roughness: 0.3
+  });
   const ioShield = new THREE.Mesh(ioGeo, ioMat);
-  ioShield.position.set(-2.6, 0.5, -0.6);
+  ioShield.position.set(-2.8, 0.65, -0.6);
   group.add(ioShield);
 
-  // Kapasitörler (Küçük Silindirler)
-  const capGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.3, 12);
-  const capMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.9, roughness: 0.1 });
-  for (let i = 0; i < 8; i++) {
+  // Altın Kaplama Ses Çıkış Jakları (Audio Jacks)
+  const jackGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.25, 16);
+  const jackMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.95, roughness: 0.1 });
+  for (let j = 0; j < 3; j++) {
+    const jack = new THREE.Mesh(jackGeo, jackMat);
+    jack.rotation.z = Math.PI / 2;
+    jack.position.set(-3.22, 0.4 + j * 0.35, 0.8);
+    group.add(jack);
+  }
+
+  // Katı Hal Japon Kondansatörleri (Solid Black Capacitors)
+  const capGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.35, 16);
+  const capMat = new THREE.MeshStandardMaterial({
+    color: 0x1e293b,
+    metalness: 0.9,
+    roughness: 0.2
+  });
+  for (let c = 0; c < 12; c++) {
     const cap = new THREE.Mesh(capGeo, capMat);
-    cap.position.set(-1.3, 0.2, -1.4 + i * 0.3);
+    cap.position.set(-1.4, 0.24, -1.8 + c * 0.32);
     group.add(cap);
   }
 
-  // Durum LED'i
-  const ledGeo = new THREE.SphereGeometry(0.06, 8, 8);
-  const ledMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
-  const led = new THREE.Mesh(ledGeo, ledMat);
-  led.position.set(2.6, 0.15, 2.6);
-  group.add(led);
+  // Anakart Çipset Soğutucusu (PCH Heatsink)
+  const pchGeo = new THREE.BoxGeometry(1.6, 0.55, 1.6);
+  const pchMat = new THREE.MeshStandardMaterial({
+    color: 0x0f172a,
+    metalness: 0.9,
+    roughness: 0.2
+  });
+  const pch = new THREE.Mesh(pchGeo, pchMat);
+  pch.position.set(1.6, 0.35, 1.8);
+  group.add(pch);
+
+  // RGB Durum Göstergesi
+  const debugLedGeo = new THREE.BoxGeometry(0.2, 0.1, 0.3);
+  const debugLedMat = new THREE.MeshBasicMaterial({ color: 0x22c55e });
+  const debugLed = new THREE.Mesh(debugLedGeo, debugLedMat);
+  debugLed.position.set(2.8, 0.16, 2.8);
+  group.add(debugLed);
 
   return group;
 }
 
 /**
- * 2. İşlemci / CPU 3D Modeli
+ * 2. İşlemci / CPU Gerçekçi 3D Modeli
  */
 export function createCpuModel() {
   const group = new THREE.Group();
 
-  // Yeşil PCB Taşıyıcı Altlık
+  // Koyu Yeşil/Siyah Çok Katmanlı PCB Taşıyıcı
   const baseGeo = new THREE.BoxGeometry(3.6, 0.12, 3.6);
-  const baseMat = new THREE.MeshStandardMaterial({ color: 0x064e3b, roughness: 0.3, metalness: 0.2 });
+  const baseMat = new THREE.MeshStandardMaterial({
+    color: 0x052e16,
+    roughness: 0.3,
+    metalness: 0.2
+  });
   const base = new THREE.Mesh(baseGeo, baseMat);
   group.add(base);
 
-  // Üst Metalik Isı Dağıtıcı Kapak (IHS)
-  const ihsGeo = new THREE.BoxGeometry(3.0, 0.25, 3.0);
+  // Nikel Kaplamalı Bakır Isı Dağıtıcı Kapak (IHS)
+  const ihsGeo = new THREE.BoxGeometry(3.0, 0.22, 3.0);
   const ihsMat = new THREE.MeshStandardMaterial({
     color: 0xffffff,
-    metalness: 0.85,
-    roughness: 0.25,
+    metalness: 0.92,
+    roughness: 0.22,
     map: createCpuTexture()
   });
   const ihs = new THREE.Mesh(ihsGeo, ihsMat);
-  ihs.position.y = 0.18;
+  ihs.position.y = 0.16;
   group.add(ihs);
 
-  // Altın Temas Noktaları (Alt yüzey)
-  const pinsGeo = new THREE.PlaneGeometry(3.2, 3.2);
+  // Altın Temas Pini Matrisi (LGA-1700 Tabanı)
+  const pinsGeo = new THREE.PlaneGeometry(3.4, 3.4);
   const pinsMat = new THREE.MeshStandardMaterial({
-    color: 0xeab308,
-    metalness: 0.95,
-    roughness: 0.2
+    map: createCpuPinTexture(),
+    metalness: 0.85,
+    roughness: 0.3
   });
   const pins = new THREE.Mesh(pinsGeo, pinsMat);
   pins.rotation.x = Math.PI / 2;
-  pins.position.y = -0.07;
+  pins.position.y = -0.065;
   group.add(pins);
+
+  // İki Kenardaki Hizalama Çentikleri
+  const notchGeo = new THREE.BoxGeometry(0.15, 0.15, 0.3);
+  const notchMat = new THREE.MeshStandardMaterial({ color: 0x052e16 });
+  const notch1 = new THREE.Mesh(notchGeo, notchMat);
+  notch1.position.set(-1.8, 0, 0);
+  const notch2 = new THREE.Mesh(notchGeo, notchMat);
+  notch2.position.set(1.8, 0, 0);
+  group.add(notch1, notch2);
 
   return group;
 }
 
 /**
- * 3. RAM Bellek 3D Modeli
+ * 3. RAM Bellek (DDR5) Gerçekçi 3D Modeli
  */
 export function createRamModel() {
   const group = new THREE.Group();
 
-  // Siyah/Koyu PCB
-  const pcbGeo = new THREE.BoxGeometry(5.2, 1.4, 0.1);
-  const pcbMat = new THREE.MeshStandardMaterial({ color: 0x09090b, roughness: 0.5 });
+  // 10 Katmanlı Mat Siyah PCB
+  const pcbGeo = new THREE.BoxGeometry(5.4, 1.4, 0.08);
+  const pcbMat = new THREE.MeshStandardMaterial({ color: 0x09090b, roughness: 0.4 });
   const pcb = new THREE.Mesh(pcbGeo, pcbMat);
   group.add(pcb);
 
-  // Altın İletken Uçlar (Pinler)
-  const pinGeo = new THREE.BoxGeometry(4.8, 0.22, 0.12);
-  const pinMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9, roughness: 0.2 });
-  const pin = new THREE.Mesh(pinGeo, pinMat);
-  pin.position.y = -0.65;
-  group.add(pin);
+  // 288-Pin Altın Temas Parmakları ve Kilit Çentiği
+  const pinLeftGeo = new THREE.BoxGeometry(2.4, 0.25, 0.1);
+  const pinRightGeo = new THREE.BoxGeometry(2.7, 0.25, 0.1);
+  const pinMat = new THREE.MeshStandardMaterial({
+    color: 0xf59e0b,
+    metalness: 0.95,
+    roughness: 0.15
+  });
+  const pinLeft = new THREE.Mesh(pinLeftGeo, pinMat);
+  pinLeft.position.set(-1.4, -0.68, 0);
+  const pinRight = new THREE.Mesh(pinRightGeo, pinMat);
+  pinRight.position.set(1.25, -0.68, 0);
+  group.add(pinLeft, pinRight);
 
-  // Alüminyum Soğutucu Blok (Heatsink)
-  const sinkGeo = new THREE.BoxGeometry(5.2, 1.1, 0.22);
+  // Çift Taraflı Eloksallı Siyah Alüminyum Soğutucu Zırhı
+  const sinkGeo = new THREE.BoxGeometry(5.4, 1.15, 0.22);
   const sinkMat = new THREE.MeshStandardMaterial({
-    color: 0x1e293b,
-    metalness: 0.8,
-    roughness: 0.3,
+    color: 0x18181b,
+    metalness: 0.85,
+    roughness: 0.25,
     map: createRamTexture()
   });
   const sink = new THREE.Mesh(sinkGeo, sinkMat);
-  sink.position.y = 0.05;
+  sink.position.y = 0.08;
   group.add(sink);
 
-  // RGB Üst Işık Şeridi (Glow)
-  const rgbGeo = new THREE.BoxGeometry(5.1, 0.2, 0.26);
+  // Üst Buzlu Difüzörlü RGB Işık Şeridi
+  const rgbGeo = new THREE.BoxGeometry(5.3, 0.18, 0.24);
   const rgbMat = new THREE.MeshStandardMaterial({
-    color: 0x06b6d4,
-    emissive: 0x06b6d4,
+    color: 0x38bdf8,
+    emissive: 0x0284c7,
     emissiveIntensity: 0.8,
-    roughness: 0.1
+    roughness: 0.2,
+    transparent: true,
+    opacity: 0.95
   });
   const rgb = new THREE.Mesh(rgbGeo, rgbMat);
-  rgb.position.y = 0.7;
+  rgb.position.y = 0.72;
   group.add(rgb);
 
-  // Animasyon fonksiyonu (RGB dalgalanması)
+  // RGB Akıcı Dalgalanma Animasyonu
   group.update = (time) => {
-    const hue = (time * 0.15) % 1;
-    rgbMat.color.setHSL(hue, 1, 0.5);
-    rgbMat.emissive.setHSL(hue, 1, 0.5);
+    const hue = (time * 0.12) % 1;
+    rgbMat.color.setHSL(hue, 0.9, 0.5);
+    rgbMat.emissive.setHSL(hue, 0.9, 0.5);
   };
 
   return group;
 }
 
 /**
- * 4. Sabit Disk / M.2 NVMe SSD 3D Modeli
+ * 4. Sabit Disk / NVMe M.2 SSD Gerçekçi 3D Modeli
  */
 export function createSsdModel() {
   const group = new THREE.Group();
 
-  // M.2 PCB Çubuğu
-  const pcbGeo = new THREE.BoxGeometry(5.0, 0.1, 1.5);
-  const pcbMat = new THREE.MeshStandardMaterial({ color: 0x09090b, roughness: 0.4 });
+  // M.2 2280 Standart Mat Siyah PCB
+  const pcbGeo = new THREE.BoxGeometry(5.2, 0.08, 1.4);
+  const pcbMat = new THREE.MeshStandardMaterial({ color: 0x09090b, roughness: 0.35 });
   const pcb = new THREE.Mesh(pcbGeo, pcbMat);
   group.add(pcb);
 
-  // Altın Uç Soket Pinleri
-  const pinGeo = new THREE.BoxGeometry(0.3, 0.12, 1.3);
-  const pinMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9, roughness: 0.2 });
+  // Altın M.2 M-Key Pin Uçları
+  const pinGeo = new THREE.BoxGeometry(0.35, 0.1, 1.25);
+  const pinMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.95, roughness: 0.15 });
   const pin = new THREE.Mesh(pinGeo, pinMat);
-  pin.position.x = -2.4;
+  pin.position.x = -2.5;
   group.add(pin);
 
-  // NAND Flash Bellek Yongaları
-  const chipGeo = new THREE.BoxGeometry(1.0, 0.15, 1.1);
-  const chipMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.2, metalness: 0.5 });
-  for (let i = 0; i < 2; i++) {
-    const chip = new THREE.Mesh(chipGeo, chipMat);
-    chip.position.set(0.2 + i * 1.3, 0.1, 0);
-    group.add(chip);
-  }
-
-  // Ana Denetleyici Yonga (Controller)
-  const ctrlGeo = new THREE.BoxGeometry(0.7, 0.18, 0.7);
-  const ctrlMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9, roughness: 0.2 });
+  // Nikel Kaplamalı Yüksek Hızlı Bellek Denetleyici Yonga (Phoenix / Pascal Controller)
+  const ctrlGeo = new THREE.BoxGeometry(0.85, 0.14, 0.85);
+  const ctrlMat = new THREE.MeshStandardMaterial({
+    color: 0xd4d4d8,
+    metalness: 0.95,
+    roughness: 0.15
+  });
   const ctrl = new THREE.Mesh(ctrlGeo, ctrlMat);
-  ctrl.position.set(-1.2, 0.12, 0);
+  ctrl.position.set(-1.2, 0.1, 0);
   group.add(ctrl);
 
-  // Üst Marka Etiketi / İnce Soğutucu
-  const labelGeo = new THREE.BoxGeometry(3.6, 0.05, 1.3);
+  // V-NAND Flash Depolama Yongaları (2 Adet Siyah Entegre)
+  const nandGeo = new THREE.BoxGeometry(1.1, 0.12, 1.1);
+  const nandMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.4 });
+  const nand1 = new THREE.Mesh(nandGeo, nandMat);
+  nand1.position.set(0.3, 0.09, 0);
+  const nand2 = new THREE.Mesh(nandGeo, nandMat);
+  nand2.position.set(1.6, 0.09, 0);
+  group.add(nand1, nand2);
+
+  // Bakır Dağıtıcı Katmanlı Gerçekçi Termal Etiket
+  const labelGeo = new THREE.BoxGeometry(4.0, 0.04, 1.25);
   const labelMat = new THREE.MeshStandardMaterial({
     color: 0xffffff,
-    roughness: 0.4,
+    roughness: 0.35,
+    metalness: 0.2,
     map: createSsdTexture()
   });
   const label = new THREE.Mesh(labelGeo, labelMat);
-  label.position.set(0.3, 0.21, 0);
+  label.position.set(0.4, 0.18, 0);
   group.add(label);
 
-  // Montaj Vida Çentiği (Yarım daire kesim)
-  const notchGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.15, 16);
-  const notchMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8 });
-  const notch = new THREE.Mesh(notchGeo, notchMat);
-  notch.position.set(2.45, 0, 0);
-  group.add(notch);
+  // Yarım Daire Montaj Vidası Çentiği
+  const screwNotchGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.12, 16);
+  const screwNotchMat = new THREE.MeshStandardMaterial({ color: 0xd4d4d8, metalness: 0.9 });
+  const screwNotch = new THREE.Mesh(screwNotchGeo, screwNotchMat);
+  screwNotch.position.set(2.55, 0, 0);
+  group.add(screwNotch);
 
   return group;
 }
 
 /**
- * 5. Ekran Kartı (GPU) 3D Modeli
+ * 5. Ekran Kartı (GPU - RTX 4070 Ti Stili) Gerçekçi 3D Modeli
  */
 export function createGpuModel() {
   const group = new THREE.Group();
 
-  // Ana Gövde / Dış Koruma Zırhı
-  const bodyGeo = new THREE.BoxGeometry(5.6, 2.2, 1.1);
-  const bodyMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3, metalness: 0.7 });
-  const body = new THREE.Mesh(bodyGeo, bodyMat);
-  group.add(body);
+  // Fırçalanmış Koyu Titanyum Dış Zırh (Shroud)
+  const shroudGeo = new THREE.BoxGeometry(5.8, 2.4, 1.3);
+  const shroudMat = new THREE.MeshStandardMaterial({
+    color: 0x1e293b,
+    metalness: 0.85,
+    roughness: 0.25
+  });
+  const shroud = new THREE.Mesh(shroudGeo, shroudMat);
+  group.add(shroud);
 
-  // Alt PCIe Bağlantı Tırnağı
-  const pcieGeo = new THREE.BoxGeometry(3.8, 0.25, 0.08);
-  const pcieMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9, roughness: 0.2 });
-  const pcie = new THREE.Mesh(pcieGeo, pcieMat);
-  pcie.position.set(-0.4, -1.2, 0);
-  group.add(pcie);
+  // Yoğun Alüminyum Soğutucu Kanatçıklar Bloğu (Heatsink Fin Stack)
+  const finGeo = new THREE.BoxGeometry(0.02, 2.0, 1.1);
+  const finMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95, roughness: 0.15 });
+  for (let f = 0; f < 35; f++) {
+    const fin = new THREE.Mesh(finGeo, finMat);
+    fin.position.set(-2.5 + f * 0.14, 0, 0);
+    group.add(fin);
+  }
 
-  // Arka Metal Plaka (Backplate)
-  const backGeo = new THREE.BoxGeometry(5.6, 2.2, 0.05);
-  const backMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.9, roughness: 0.2 });
-  const backplate = new THREE.Mesh(backGeo, backMat);
-  backplate.position.z = -0.55;
+  // Kanatçıkların İçinden Geçen Bakır Isı Boruları (Copper Heatpipes)
+  for (let p = 0; p < 3; p++) {
+    const pipeGeo = new THREE.CylinderGeometry(0.07, 0.07, 5.4, 16);
+    const pipeMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.95, roughness: 0.15 });
+    const pipe = new THREE.Mesh(pipeGeo, pipeMat);
+    pipe.rotation.z = Math.PI / 2;
+    pipe.position.set(0, -0.5 + p * 0.5, 0.2);
+    group.add(pipe);
+  }
+
+  // Fırçalanmış Arka Koruma Plakası (Backplate)
+  const backplateGeo = new THREE.BoxGeometry(5.8, 2.4, 0.05);
+  const backplateMat = new THREE.MeshStandardMaterial({
+    color: 0x0f172a,
+    metalness: 0.9,
+    roughness: 0.2,
+    map: createGpuBackplateTexture()
+  });
+  const backplate = new THREE.Mesh(backplateGeo, backplateMat);
+  backplate.position.z = -0.66;
   group.add(backplate);
 
-  // İki Adet Dönen Soğutucu Fan
+  // İki Adet Dönen Yüksek Verimli Aerodinamik Fan
   const fans = [];
-  const fanCenters = [-1.3, 1.3];
+  const fanX = [-1.4, 1.4];
 
-  fanCenters.forEach(x => {
-    // Fan Çember Yuvası
-    const ringGeo = new THREE.TorusGeometry(0.85, 0.08, 16, 32);
-    const ringMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.8 });
+  fanX.forEach(x => {
+    // Metalik Fan Çemberi
+    const ringGeo = new THREE.TorusGeometry(0.9, 0.06, 16, 32);
+    const ringMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, metalness: 0.9 });
     const ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.position.set(x, 0, 0.56);
+    ring.position.set(x, 0, 0.66);
     group.add(ring);
 
-    // Fan Göbeği ve Pervaneleri
     const fanGroup = new THREE.Group();
-    fanGroup.position.set(x, 0, 0.56);
+    fanGroup.position.set(x, 0, 0.66);
 
-    const hubGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.15, 16);
-    const hubMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.9 });
+    // Metal Merkez Rozet
+    const hubGeo = new THREE.CylinderGeometry(0.32, 0.32, 0.12, 24);
+    const hubMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.95, roughness: 0.15 });
     const hub = new THREE.Mesh(hubGeo, hubMat);
     hub.rotation.x = Math.PI / 2;
     fanGroup.add(hub);
 
-    // Pervane Kanatları (9 Kanat)
+    // 9 Adet Kavisli Füme Kanat
     for (let i = 0; i < 9; i++) {
-      const bladeGeo = new THREE.BoxGeometry(0.65, 0.15, 0.04);
-      const bladeMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 });
+      const bladeGeo = new THREE.BoxGeometry(0.68, 0.18, 0.03);
+      const bladeMat = new THREE.MeshStandardMaterial({
+        color: 0x18181b,
+        roughness: 0.35,
+        transparent: true,
+        opacity: 0.92
+      });
       const blade = new THREE.Mesh(bladeGeo, bladeMat);
       const angle = (i / 9) * Math.PI * 2;
-      blade.position.set(Math.cos(angle) * 0.45, Math.sin(angle) * 0.45, 0);
-      blade.rotation.z = angle + 0.3;
-      blade.rotation.y = 0.3;
+      blade.position.set(Math.cos(angle) * 0.48, Math.sin(angle) * 0.48, 0);
+      blade.rotation.z = angle + 0.32;
+      blade.rotation.y = 0.35;
       fanGroup.add(blade);
     }
 
@@ -328,198 +423,196 @@ export function createGpuModel() {
     group.add(fanGroup);
   });
 
-  // Metal Arka Port Braketi
-  const bracketGeo = new THREE.BoxGeometry(0.1, 2.8, 1.2);
-  const bracketMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.95, roughness: 0.1 });
+  // PCIe x16 Altın Bağlantı Tırnağı
+  const pcieGeo = new THREE.BoxGeometry(4.0, 0.28, 0.08);
+  const pcieMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.95, roughness: 0.15 });
+  const pcie = new THREE.Mesh(pcieGeo, pcieMat);
+  pcie.position.set(-0.5, -1.32, 0);
+  group.add(pcie);
+
+  // Çift Yuvalı (Dual-Slot) Arka Metal Çıkış Braketi
+  const bracketGeo = new THREE.BoxGeometry(0.12, 3.0, 1.4);
+  const bracketMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95, roughness: 0.1 });
   const bracket = new THREE.Mesh(bracketGeo, bracketMat);
-  bracket.position.set(-2.85, 0.2, 0);
+  bracket.position.set(-2.95, 0.2, 0);
   group.add(bracket);
 
-  // RGB Işıklı Yan Logo
-  const rgbGeo = new THREE.BoxGeometry(2.0, 0.25, 0.05);
-  const rgbMat = new THREE.MeshStandardMaterial({
-    color: 0x10b981,
-    emissive: 0x10b981,
-    emissiveIntensity: 0.9
-  });
-  const rgbLogo = new THREE.Mesh(rgbGeo, rgbMat);
-  rgbLogo.position.set(0, 1.05, 0.55);
-  group.add(rgbLogo);
-
-  // Fan Dönüş Animasyonu
   group.update = (time, delta = 0.016) => {
     fans.forEach(f => {
-      f.rotation.z += delta * 12;
+      f.rotation.z += delta * 14;
     });
-    const hue = (time * 0.2) % 1;
-    rgbMat.color.setHSL(hue, 1, 0.5);
-    rgbMat.emissive.setHSL(hue, 1, 0.5);
   };
 
   return group;
 }
 
 /**
- * 6. Güç Kaynağı / PSU 3D Modeli
+ * 6. Güç Kaynağı / PSU Gerçekçi 3D Modeli
  */
 export function createPsuModel() {
   const group = new THREE.Group();
 
-  // Metal Kasa Kutusu
-  const boxGeo = new THREE.BoxGeometry(4.0, 2.6, 3.6);
-  const boxMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.5, metalness: 0.7 });
+  // Mat Siyah Çelik Toz Boyalı Gövde
+  const boxGeo = new THREE.BoxGeometry(4.2, 2.7, 3.8);
+  const boxMat = new THREE.MeshStandardMaterial({
+    color: 0x18181b,
+    roughness: 0.45,
+    metalness: 0.6
+  });
   const box = new THREE.Mesh(boxGeo, boxMat);
   group.add(box);
 
-  // Üst Havalandırma Izgarası & Fan
-  const grillGeo = new THREE.TorusGeometry(1.2, 0.08, 16, 32);
-  const grillMat = new THREE.MeshStandardMaterial({ color: 0xd4d4d8, metalness: 0.9 });
+  // 120mm Üst Fan Yuvarlak Tel Izgarası
+  const grillGeo = new THREE.TorusGeometry(1.3, 0.06, 16, 32);
+  const grillMat = new THREE.MeshStandardMaterial({ color: 0xd4d4d8, metalness: 0.95, roughness: 0.1 });
   const grill = new THREE.Mesh(grillGeo, grillMat);
   grill.rotation.x = Math.PI / 2;
-  grill.position.y = 1.31;
+  grill.position.y = 1.36;
   group.add(grill);
 
-  // Psu Fanı
+  // 7 Kanatlı Dönen Sessiz Hidrolik Fan
   const fanGroup = new THREE.Group();
-  fanGroup.position.y = 1.25;
+  fanGroup.position.y = 1.3;
   fanGroup.rotation.x = Math.PI / 2;
-  const hubGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.1, 16);
-  const hubMat = new THREE.MeshStandardMaterial({ color: 0x3f3f46, metalness: 0.6 });
+
+  const hubGeo = new THREE.CylinderGeometry(0.4, 0.4, 0.08, 24);
+  const hubMat = new THREE.MeshStandardMaterial({ color: 0x27272a, metalness: 0.5 });
   const hub = new THREE.Mesh(hubGeo, hubMat);
   fanGroup.add(hub);
 
   for (let i = 0; i < 7; i++) {
-    const bladeGeo = new THREE.BoxGeometry(0.8, 0.2, 0.03);
-    const bladeMat = new THREE.MeshStandardMaterial({ color: 0x27272a });
+    const bladeGeo = new THREE.BoxGeometry(0.85, 0.22, 0.03);
+    const bladeMat = new THREE.MeshStandardMaterial({ color: 0x09090b });
     const blade = new THREE.Mesh(bladeGeo, bladeMat);
     const angle = (i / 7) * Math.PI * 2;
-    blade.position.set(Math.cos(angle) * 0.55, 0, Math.sin(angle) * 0.55);
+    blade.position.set(Math.cos(angle) * 0.58, 0, Math.sin(angle) * 0.58);
     blade.rotation.y = angle;
-    blade.rotation.x = 0.3;
+    blade.rotation.x = 0.35;
     fanGroup.add(blade);
   }
   group.add(fanGroup);
 
-  // Arka Güç Girişi ve Açma/Kapama Düğmesi
-  const plugGeo = new THREE.BoxGeometry(0.7, 0.45, 0.1);
+  // Arka Güç Girişi Soketi ve I/O Açma Anahtarı
+  const plugGeo = new THREE.BoxGeometry(0.8, 0.5, 0.1);
   const plugMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
   const plug = new THREE.Mesh(plugGeo, plugMat);
-  plug.position.set(1.0, 0.3, 1.81);
+  plug.position.set(1.1, 0.4, 1.91);
   group.add(plug);
 
-  const switchGeo = new THREE.BoxGeometry(0.35, 0.4, 0.15);
+  const switchGeo = new THREE.BoxGeometry(0.35, 0.45, 0.12);
   const switchMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.3 });
   const pwrSwitch = new THREE.Mesh(switchGeo, switchMat);
-  pwrSwitch.position.set(-0.8, 0.3, 1.82);
+  pwrSwitch.position.set(-0.8, 0.4, 1.92);
   group.add(pwrSwitch);
 
-  // Renkli Güç Kablosu Demeti (24-Pin ATX ve PCIe kabloları)
-  const cableColors = [0xf59e0b, 0xef4444, 0x10b981, 0x000000, 0x3b82f6];
-  for (let i = 0; i < 10; i++) {
+  // Örgülü Siyah Güç Kabloları (Braided Sleeved ATX & PCIe Cables)
+  const cableMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.6 });
+  for (let i = 0; i < 8; i++) {
     const curve = new THREE.CubicBezierCurve3(
-      new THREE.Vector3(-1.2 + (i % 5) * 0.3, -0.6 + Math.floor(i / 5) * 0.3, -1.8),
-      new THREE.Vector3(-1.5 + (i % 5) * 0.4, -0.9, -2.8),
-      new THREE.Vector3(-1.0 + (i % 5) * 0.5, -1.2, -3.5),
-      new THREE.Vector3(-0.6 + (i % 5) * 0.3, -1.0, -4.2)
+      new THREE.Vector3(-1.4 + (i % 4) * 0.4, -0.6 + Math.floor(i / 4) * 0.4, -1.9),
+      new THREE.Vector3(-1.8 + (i % 4) * 0.5, -1.0, -2.8),
+      new THREE.Vector3(-1.2 + (i % 4) * 0.4, -1.2, -3.6),
+      new THREE.Vector3(-0.6 + (i % 4) * 0.3, -0.8, -4.4)
     );
-    const tubeGeo = new THREE.TubeGeometry(curve, 20, 0.05, 8, false);
-    const tubeMat = new THREE.MeshStandardMaterial({
-      color: cableColors[i % cableColors.length],
-      roughness: 0.5
-    });
-    const tube = new THREE.Mesh(tubeGeo, tubeMat);
+    const tubeGeo = new THREE.TubeGeometry(curve, 20, 0.06, 8, false);
+    const tube = new THREE.Mesh(tubeGeo, cableMat);
     group.add(tube);
   }
 
   group.update = (time, delta = 0.016) => {
-    fanGroup.rotation.y += delta * 8;
+    fanGroup.rotation.y += delta * 10;
   };
 
   return group;
 }
 
 /**
- * 7. Soğutucu Fan (CPU Cooler) 3D Modeli
+ * 7. Soğutucu Kule Fan (Tower Cooler) Gerçekçi 3D Modeli
  */
 export function createCoolerModel() {
   const group = new THREE.Group();
 
-  // Bakır Taban Bloğu
-  const baseGeo = new THREE.BoxGeometry(1.8, 0.25, 1.8);
-  const baseMat = new THREE.MeshStandardMaterial({ color: 0xb45309, metalness: 0.95, roughness: 0.2 });
+  // Ayna Parlaklığında Masif Bakır Taban Bloğu
+  const baseGeo = new THREE.BoxGeometry(1.8, 0.28, 1.8);
+  const baseMat = new THREE.MeshStandardMaterial({
+    color: 0xd97706,
+    metalness: 0.95,
+    roughness: 0.1
+  });
   const base = new THREE.Mesh(baseGeo, baseMat);
   base.position.y = -1.2;
   group.add(base);
 
-  // 4 Adet U-Tipi Bakır Isı Borusu (Heatpipes)
+  // 4 Adet U-Tipi Nikel Kaplamalı Bakır Isı Borusu
+  const pipeMat = new THREE.MeshStandardMaterial({
+    color: 0xf59e0b,
+    metalness: 0.95,
+    roughness: 0.15
+  });
   for (let i = 0; i < 4; i++) {
     const curve = new THREE.CubicBezierCurve3(
       new THREE.Vector3(-0.5 + (i % 2) * 1.0, -1.2, -0.4 + Math.floor(i / 2) * 0.8),
-      new THREE.Vector3(-0.7 + (i % 2) * 1.4, -0.2, -0.4 + Math.floor(i / 2) * 0.8),
-      new THREE.Vector3(-0.5 + (i % 2) * 1.0, 1.2, -0.4 + Math.floor(i / 2) * 0.8),
-      new THREE.Vector3(0, 1.4, -0.4 + Math.floor(i / 2) * 0.8)
+      new THREE.Vector3(-0.8 + (i % 2) * 1.6, -0.2, -0.4 + Math.floor(i / 2) * 0.8),
+      new THREE.Vector3(-0.5 + (i % 2) * 1.0, 1.3, -0.4 + Math.floor(i / 2) * 0.8),
+      new THREE.Vector3(0, 1.45, -0.4 + Math.floor(i / 2) * 0.8)
     );
-    const pipeGeo = new THREE.TubeGeometry(curve, 16, 0.07, 8, false);
-    const pipeMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.9, roughness: 0.2 });
+    const pipeGeo = new THREE.TubeGeometry(curve, 18, 0.08, 8, false);
     const pipe = new THREE.Mesh(pipeGeo, pipeMat);
     group.add(pipe);
   }
 
-  // Alüminyum Soğutucu Yaprakları (Fins kulesi)
-  const finGeo = new THREE.BoxGeometry(2.4, 0.02, 2.2);
-  const finMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.8, roughness: 0.3 });
-  for (let i = 0; i < 28; i++) {
+  // 36 Katlı Hassas Alüminyum Soğutucu Kanatçıklar Kulesi
+  const finGeo = new THREE.BoxGeometry(2.5, 0.02, 2.2);
+  const finMat = new THREE.MeshStandardMaterial({
+    color: 0xf1f5f9,
+    metalness: 0.9,
+    roughness: 0.2
+  });
+  for (let i = 0; i < 36; i++) {
     const fin = new THREE.Mesh(finGeo, finMat);
-    fin.position.y = -1.0 + i * 0.08;
+    fin.position.y = -1.0 + i * 0.065;
     group.add(fin);
   }
 
-  // RGB Soğutucu Fan Ünitesi (Ön Yüzde)
+  // 120mm Ön Soğutma Fanı Ünitesi
   const fanGroup = new THREE.Group();
-  fanGroup.position.set(0, 0.1, 1.2);
+  fanGroup.position.set(0, 0.1, 1.25);
 
-  // Yuvarlak RGB Işık Halkası
-  const rgbRingGeo = new THREE.TorusGeometry(1.0, 0.08, 16, 32);
-  const rgbRingMat = new THREE.MeshStandardMaterial({
-    color: 0x38bdf8,
-    emissive: 0x38bdf8,
-    emissiveIntensity: 0.9
-  });
-  const rgbRing = new THREE.Mesh(rgbRingGeo, rgbRingMat);
-  fanGroup.add(rgbRing);
+  // Kauçuk Titreşim Önleyici Köşe Pedleri Olan Fan Çerçevesi
+  const frameGeo = new THREE.BoxGeometry(2.4, 2.4, 0.25);
+  const frameMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.4 });
+  const fanFrame = new THREE.Mesh(frameGeo, frameMat);
+  fanGroup.add(fanFrame);
 
-  // Fan Göbeği
-  const hubGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.15, 16);
-  const hubMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3 });
+  // Fan Pervanesi ve Motor Göbeği
+  const rotorGroup = new THREE.Group();
+  const hubGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.18, 24);
+  const hubMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.8 });
   const hub = new THREE.Mesh(hubGeo, hubMat);
   hub.rotation.x = Math.PI / 2;
-  fanGroup.add(hub);
+  rotorGroup.add(hub);
 
-  // Şeffaf/Buzlu Pervane Kanatları
-  const blades = [];
+  // 9 Adet Buzlu Yarı Saydam Kanat
   for (let i = 0; i < 9; i++) {
-    const bladeGeo = new THREE.BoxGeometry(0.75, 0.2, 0.03);
+    const bladeGeo = new THREE.BoxGeometry(0.8, 0.22, 0.03);
     const bladeMat = new THREE.MeshStandardMaterial({
-      color: 0xf1f5f9,
-      roughness: 0.2,
+      color: 0xf8fafc,
+      roughness: 0.25,
       transparent: true,
-      opacity: 0.85
+      opacity: 0.9
     });
     const blade = new THREE.Mesh(bladeGeo, bladeMat);
     const angle = (i / 9) * Math.PI * 2;
-    blade.position.set(Math.cos(angle) * 0.48, Math.sin(angle) * 0.48, 0);
+    blade.position.set(Math.cos(angle) * 0.5, Math.sin(angle) * 0.5, 0);
     blade.rotation.z = angle + 0.35;
     blade.rotation.y = 0.35;
-    fanGroup.add(blade);
-    blades.push(blade);
+    rotorGroup.add(blade);
   }
+  fanGroup.add(rotorGroup);
   group.add(fanGroup);
 
   group.update = (time, delta = 0.016) => {
-    fanGroup.rotation.z += delta * 15;
-    const hue = (time * 0.25) % 1;
-    rgbRingMat.color.setHSL(hue, 1, 0.5);
-    rgbRingMat.emissive.setHSL(hue, 1, 0.5);
+    rotorGroup.rotation.z += delta * 16;
   };
 
   return group;
